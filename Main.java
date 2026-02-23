@@ -19,7 +19,7 @@ public class Main
             "FIN\n" +
             "%%%%\n" +
             "%DEFAULT=1\n" +
-            "%COLOR_TEXTO_SI 12,45,1|1\n" +
+            "%COLOR_TEXTO_SI=12,45,1|1\n" +
             "%FIGURA_MIENTRAS CIRCULO 1\n" +
             "%DEFAULT 3\n";
 
