@@ -96,6 +96,10 @@ EspaciosEnBlanco = [ \t\r\n]+ // Espacios en blaco para ignorar
 }
 
 /* Instrucciones de configuracion */
+"%DEFAULT"
+{
+    return new Symbol(sym.CONF_DEFAULT, yyline + 1, yycolumn + 1, yytext());
+}
 "%COLOR_TEXTO_SI"
 {
     return new Symbol(sym.CONF_COLOR_TEXT_SI, yyline + 1, yycolumn + 1, yytext());
