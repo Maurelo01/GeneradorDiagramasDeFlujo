@@ -1,0 +1,280 @@
+import java_cup.runtime.*;
+import java.util.ArrayList;
+
+/***** CÓDIGO DE USUARIO *****/
+parser code {:
+    public static class ErrorSintactico
+    {
+        public String lexema;
+        public int linea;
+        public int columna;
+        public String descripcion;
+
+        public ErrorSintactico(String lexema, int linea, int columna, String descripcion)
+        {
+            this.lexema = lexema;
+            this.linea = linea;
+            this.columna = columna;
+            this.descripcion = descripcion;
+        }
+    }
+    public ArrayList<ErrorSintactico> listaErrores = new ArrayList<>();
+    @Override
+    public void syntax_error(Symbol s)
+    {
+        String lexema = s.value != null ? s.value.toString() : "Token desconocido";
+        listaErrores.add(new ErrorSintactico(lexema, s.left, s.right, "Se esperaba otro token"));
+        System.err.println("Error Sintáctico: " + lexema + " en línea " + s.left + " columna " + s.right);
+    }
+    @Override
+    public void unrecovered_syntax_error(Symbol s) throws java.lang.Exception
+    {
+        String lexema = s.value != null ? s.value.toString() : "Token desconocido";
+        listaErrores.add(new ErrorSintactico(lexema, s.left, s.right, "Error sintáctico irrecuperable"));
+        System.err.println("Error Sintáctico Irrecuperable: " + lexema + " en línea " + s.left + " columna " + s.right);
+    }
+:}
+
+/***** TERMINALES ****/
+
+/* Palabras Reservadas */
+terminal String INICIO, FIN, VAR, SI, ENTONCES, MIENTRAS, HACER, MOSTRAR, LEER, FINSI, FINMIENTRAS;
+terminal String SEPARADOR;
+
+/* Configuraciones de SI */
+terminal String CONF_COLOR_TEXT_SI, CONF_COLOR_SI, CONF_FIGURA_SI, CONF_LETRA_SI, CONF_LETRA_SIZE_SI;
+
+/* Configuraciones de MIENTRAS */
+terminal String CONF_COLOR_TEXT_MIENTRAS, CONF_COLOR_MIENTRAS, CONF_FIGURA_MIENTRAS, CONF_LETRA_MIENTRAS, CONF_LETRA_SIZE_MIENTRAS;
+
+/* Configuraciones de BLOQUE */
+terminal String CONF_COLOR_TEXT_BLOQUE, CONF_COLOR_BLOQUE, CONF_FIGURA_BLOQUE, CONF_LETRA_BLOQUE, CONF_LETRA_SIZE_BLOQUE;
+
+/* Configuración Default */
+terminal String CONF_DEFAULT;
+
+/* Figuras permitidas */
+terminal String FIG_ELIPSE, FIG_CIRCULO, FIG_PARALELOGRAMO, FIG_RECTANGULO, FIG_ROMBO, FIG_REC_REDONDEADO;
+
+/* Fuentes permitidas */
+terminal String FONT_ARIAL, FONT_TIMES, FONT_COMIC, FONT_VERDANA;
+
+/* Operadores Aritméticos */
+terminal String MAS, MENOS, POR, DIV;
+
+/* Operadores Relacionales */
+terminal String IGUALDAD, DIFERENTE, MAYOR, MENOR, MAYOR_IGUAL, MENOR_IGUAL;
+
+/* Operadores Lógicos */
+terminal String AND, OR, NOT;
+
+/* Signos de Agrupación */
+terminal String IGUAL_ASIG, PAR_IZQ, PAR_DER, PIPE, COMA;
+
+/* Patrones */
+terminal String ENTERO, DECIMAL, ID, CADENA, COLOR_HEX;
+
+/***** NO TERMINALES *****/
+non terminal programa;
+non terminal seccion_algoritmo, instrucciones, instruccion;
+non terminal bloque_simple, instruccion_simple;
+non terminal declaracion, asignacion, mostrar, leer;
+non terminal condicional, ciclo;
+non terminal expr_aritmetica, condicion;
+non terminal seccion_configuracion, configuraciones, configuracion;
+non terminal expr_color, figura, fuente, indice_opt;
+non terminal cierre_si, cierre_mientras;
+
+/***** PRECEDENCIA DE OPERADORES *****/
+// De menor a mayor precedencia
+precedence left OR;
+precedence left AND;
+precedence right NOT;
+precedence left IGUALDAD, DIFERENTE, MENOR, MAYOR, MENOR_IGUAL, MAYOR_IGUAL;
+precedence left MAS, MENOS;
+precedence left POR, DIV;
+
+/***** GRAMATICA *****/
+
+start with programa;
+
+/***** PRINCIPAL ****/
+
+programa ::= 
+    seccion_algoritmo SEPARADOR seccion_configuracion
+    ;
+
+/***** SECCION DE ALGORITMO *****/
+
+seccion_algoritmo ::= 
+    INICIO instrucciones FIN
+    ;
+
+instrucciones ::= 
+    instrucciones instruccion
+    | instruccion
+    ;
+
+/* Instrucción de primer nivel (puede ser ciclo o condicional) */
+instruccion ::= 
+    instruccion_simple
+    | condicional
+    | ciclo
+    ;
+
+/* Bloque interno para evitar anidamientos. Solo acepta instrucciones simples */
+bloque_simple ::= 
+    bloque_simple instruccion_simple
+    | instruccion_simple
+    ;
+
+instruccion_simple ::= 
+    declaracion
+    | asignacion
+    | mostrar
+    | leer
+    ;
+
+/***** INSTRUCCIONES SIMPLES *****/
+
+declaracion ::= 
+    VAR ID IGUAL_ASIG expr_aritmetica
+    | VAR ID
+    ;
+
+asignacion ::= 
+    ID IGUAL_ASIG expr_aritmetica
+    ;
+
+mostrar ::= 
+    MOSTRAR CADENA
+    | MOSTRAR expr_aritmetica
+    ;
+
+leer ::= 
+    LEER ID
+    ;
+
+/***** ESTRUCTURAS DE CONTROL *****/
+
+/* Trampas de espaciado resueltas */
+cierre_si ::= 
+    FINSI 
+    | FIN SI
+    ;
+
+cierre_mientras ::= 
+    FINMIENTRAS 
+    | FIN MIENTRAS
+    ;
+
+condicional ::= 
+    SI PAR_IZQ condicion PAR_DER ENTONCES bloque_simple cierre_si
+    ;
+
+ciclo ::= 
+    MIENTRAS PAR_IZQ condicion PAR_DER HACER bloque_simple cierre_mientras
+    ;
+
+/**** EXPRESIONES ARITMÉTICAS ****/
+
+expr_aritmetica ::= 
+    expr_aritmetica MAS expr_aritmetica
+    | expr_aritmetica MENOS expr_aritmetica
+    | expr_aritmetica POR expr_aritmetica
+    | expr_aritmetica DIV expr_aritmetica
+    | PAR_IZQ expr_aritmetica PAR_DER
+    | ENTERO
+    | DECIMAL
+    | ID
+    ;
+
+/***** CONDICIONES *****/
+
+condicion ::= 
+    expr_aritmetica IGUALDAD expr_aritmetica
+    | expr_aritmetica DIFERENTE expr_aritmetica
+    | expr_aritmetica MAYOR expr_aritmetica
+    | expr_aritmetica MENOR expr_aritmetica
+    | expr_aritmetica MAYOR_IGUAL expr_aritmetica
+    | expr_aritmetica MENOR_IGUAL expr_aritmetica
+    | condicion AND condicion
+    | condicion OR condicion
+    | NOT condicion
+    | PAR_IZQ condicion PAR_DER
+    ;
+
+/***** SECCIÓN DE CONFIGURACIÓN *****/
+
+seccion_configuracion ::= 
+    configuraciones
+    ;
+
+configuraciones ::= 
+    configuraciones configuracion
+    | configuracion
+    ;
+
+/* El índice en las configuraciones puede llevar barra vertical | o solo un espacio */
+indice_opt ::= 
+    PIPE expr_aritmetica
+    | expr_aritmetica
+    | /* vacío */
+    ;
+
+/* Colores en formato RGB separado por comas o hexa */
+expr_color ::= 
+    expr_aritmetica COMA expr_aritmetica COMA expr_aritmetica
+    | COLOR_HEX
+    ;
+
+figura ::= 
+    FIG_ELIPSE 
+    | FIG_CIRCULO 
+    | FIG_PARALELOGRAMO 
+    | FIG_RECTANGULO 
+    | FIG_ROMBO 
+    | FIG_REC_REDONDEADO
+    ;
+
+fuente ::= 
+    FONT_ARIAL 
+    | FONT_TIMES 
+    | FONT_COMIC 
+    | FONT_VERDANA
+    ;
+
+/***** REGLAS DE CONFIGURACIÓN *****/
+
+configuracion ::= 
+    /* Configuración Default */
+    CONF_DEFAULT IGUAL_ASIG expr_aritmetica
+    | CONF_DEFAULT expr_aritmetica
+
+    /* Configuraciones de SI */
+    | CONF_COLOR_TEXT_SI IGUAL_ASIG expr_color indice_opt
+    | CONF_COLOR_SI IGUAL_ASIG expr_color indice_opt
+    | CONF_FIGURA_SI IGUAL_ASIG figura indice_opt
+    | CONF_FIGURA_SI figura indice_opt
+    | CONF_LETRA_SI IGUAL_ASIG fuente indice_opt
+    | CONF_LETRA_SIZE_SI IGUAL_ASIG expr_aritmetica indice_opt
+
+    /* Configuraciones de MIENTRAS */
+    | CONF_COLOR_TEXT_MIENTRAS IGUAL_ASIG expr_color indice_opt
+    | CONF_COLOR_MIENTRAS IGUAL_ASIG expr_color indice_opt
+    | CONF_FIGURA_MIENTRAS IGUAL_ASIG figura indice_opt
+    | CONF_FIGURA_MIENTRAS figura indice_opt
+    | CONF_LETRA_MIENTRAS IGUAL_ASIG fuente indice_opt
+    | CONF_LETRA_SIZE_MIENTRAS IGUAL_ASIG expr_aritmetica indice_opt
+
+    /* Configuraciones de BLOQUE */
+    | CONF_COLOR_TEXT_BLOQUE IGUAL_ASIG expr_color indice_opt
+    | CONF_COLOR_BLOQUE IGUAL_ASIG expr_color indice_opt
+    | CONF_FIGURA_BLOQUE IGUAL_ASIG figura indice_opt
+    | CONF_FIGURA_BLOQUE figura indice_opt
+    | CONF_LETRA_BLOQUE IGUAL_ASIG fuente indice_opt
+    | CONF_LETRA_SIZE_BLOQUE IGUAL_ASIG expr_aritmetica indice_opt
+
+    /* Recuperacion de errores: Si algo está mal se ignora y sigue leyendo las demas sin crashear el programa */
+    | error
+    ;
