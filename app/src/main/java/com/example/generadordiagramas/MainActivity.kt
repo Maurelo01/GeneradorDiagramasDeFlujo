@@ -1,59 +1,98 @@
 package com.example.generadordiagramas
 
 import android.os.Bundle
-import com.google.android.material.snackbar.Snackbar
+import android.view.View
+import android.widget.Button
+import android.widget.EditText
+import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
-import androidx.navigation.findNavController
-import androidx.navigation.ui.AppBarConfiguration
-import androidx.navigation.ui.navigateUp
-import androidx.navigation.ui.setupActionBarWithNavController
-import android.view.Menu
-import android.view.MenuItem
-import com.example.generadordiagramas.databinding.ActivityMainBinding
+import java.io.StringReader
+
+import com.example.generadordiagramas.analizador.Lexer
+import com.example.generadordiagramas.analizador.Parser
 
 class MainActivity : AppCompatActivity() {
 
-    private lateinit var appBarConfiguration: AppBarConfiguration
-    private lateinit var binding: ActivityMainBinding
+    private lateinit var etCodigo: EditText
+    private lateinit var btnCompilar: Button
+    private lateinit var btnReportes: Button
+    private var listaLexicos = ArrayList<Lexer.ErrorLexico>()
+    private var listaSintacticos = ArrayList<Any>()
 
-    override fun onCreate(savedInstanceState: Bundle?) {
+    override fun onCreate(savedInstanceState: Bundle?)
+    {
         super.onCreate(savedInstanceState)
-
-        binding = ActivityMainBinding.inflate(layoutInflater)
-        setContentView(binding.root)
-
-        setSupportActionBar(binding.toolbar)
-
-        val navController = findNavController(R.id.nav_host_fragment_content_main)
-        appBarConfiguration = AppBarConfiguration(navController.graph)
-        setupActionBarWithNavController(navController, appBarConfiguration)
-
-        binding.fab.setOnClickListener { view ->
-            Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                .setAction("Action", null)
-                .setAnchorView(R.id.fab).show()
+        setContentView(R.layout.activity_main)
+        etCodigo = findViewById(R.id.etCodigo)
+        btnCompilar = findViewById(R.id.btnCompilar)
+        btnReportes = findViewById(R.id.btnReportes)
+        btnCompilar.setOnClickListener()
+        {
+            val codigoTexto = etCodigo.text.toString()
+            if (codigoTexto.isBlank())
+            {
+                Toast.makeText(this, "Por favor ingresa algún código", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
+            compilarCodigo(codigoTexto)
+        }
+        btnReportes.setOnClickListener()
+        {
+            mostrarVentanaErrores()
         }
     }
 
-    override fun onCreateOptionsMenu(menu: Menu): Boolean {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        menuInflater.inflate(R.menu.menu_main, menu)
-        return true
-    }
-
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        return when (item.itemId) {
-            R.id.action_settings -> true
-            else -> super.onOptionsItemSelected(item)
+    private fun compilarCodigo(codigo: String)
+    {
+        try
+        {
+            val lexer = Lexer(StringReader(codigo))
+            val parser = Parser(lexer)
+            parser.parse()
+            listaLexicos = lexer.listaErrores ?: ArrayList()
+            listaSintacticos = parser.listaErrores as? ArrayList<Any> ?: ArrayList()
+            val totalErrores = listaLexicos.size + listaSintacticos.size
+            if (totalErrores == 0)
+            {
+                btnReportes.visibility = View.GONE
+                Toast.makeText(this, "¡Compilación Exitosa!", Toast.LENGTH_SHORT).show()
+            }
+            else
+            {
+                btnReportes.visibility = View.VISIBLE
+                Toast.makeText(this, "Se encontraron $totalErrores errores", Toast.LENGTH_LONG).show()
+            }
+        }
+        catch (e: Exception)
+        {
+            e.printStackTrace()
+            Toast.makeText(this, "Ocurrió un error en el análisis", Toast.LENGTH_LONG).show()
         }
     }
 
-    override fun onSupportNavigateUp(): Boolean {
-        val navController = findNavController(R.id.nav_host_fragment_content_main)
-        return navController.navigateUp(appBarConfiguration)
-                || super.onSupportNavigateUp()
+    private fun mostrarVentanaErrores()
+    {
+        val reporte = StringBuilder()
+        if (listaLexicos.isNotEmpty())
+        {
+            reporte.append(" ERRORES LÉXICOS ")
+            for (error in listaLexicos)
+            {
+                reporte.append(" Símbolo '${error.lexema}' no reconocido en Línea: ${error.linea}, Columna: ${error.columna}")
+            }
+        }
+        if (listaSintacticos.isNotEmpty())
+        {
+            reporte.append(" ERRORES SINTÁCTICOS ")
+            for (errorObj in listaSintacticos)
+            {
+                if (errorObj is Parser.ErrorSintactico)
+                {
+                    reporte.append(" Se esperaba otro token cerca de '${errorObj.lexema}' en Línea: ${errorObj.linea}, Columna: ${errorObj.columna}")
+                }
+            }
+        }
+        AlertDialog.Builder(this).setTitle("Reporte de Errores").setMessage(reporte.toString()).setPositiveButton("Entendido") { dialog, _ -> dialog.dismiss()}.show()
     }
 }
