@@ -65,38 +65,56 @@ parser code {:
         public java.util.HashMap<Integer, String> coloresTextoSi = new java.util.HashMap<>();
         public java.util.HashMap<Integer, String> coloresSi = new java.util.HashMap<>();
         public java.util.HashMap<Integer, String> figurasSi = new java.util.HashMap<>();
+        public java.util.HashMap<Integer, String> fuentesSi = new java.util.HashMap<>();
+        public java.util.HashMap<Integer, Double> sizesSi = new java.util.HashMap<>();
 
         public java.util.HashMap<Integer, String> coloresTextoMientras = new java.util.HashMap<>();
         public java.util.HashMap<Integer, String> coloresMientras = new java.util.HashMap<>();
         public java.util.HashMap<Integer, String> figurasMientras = new java.util.HashMap<>();
+        public java.util.HashMap<Integer, String> fuentesMientras = new java.util.HashMap<>();
+        public java.util.HashMap<Integer, Double> sizesMientras = new java.util.HashMap<>();
 
         public java.util.HashMap<Integer, String> coloresTextoBloque = new java.util.HashMap<>();
         public java.util.HashMap<Integer, String> coloresBloques = new java.util.HashMap<>();
         public java.util.HashMap<Integer, String> figurasBloque = new java.util.HashMap<>();
+        public java.util.HashMap<Integer, String> fuentesBloque = new java.util.HashMap<>();
+        public java.util.HashMap<Integer, Double> sizesBloques = new java.util.HashMap<>();
 
         public String colorTextoSi = "#000000";
         public String colorSi = "#CE93D8";
         public String figuraSi = "ROMBO";
+        public String fuenteSi = "ARIAL";
+        public Double sizeSi = 40.0;
 
         public String colorTextoMientras = "#000000";
         public String colorMientras = "#CE93D8";
         public String figuraMientras = "ROMBO";
+        public String fuenteMientras = "ARIAL";
+        public Double sizeMientras = 40.0;
 
         public String colorTextoBloque = "#000000";
         public String colorBloque = "#90CAF9";
         public String figuraBloque = "RECTANGULO";
+        public String fuenteBloque = "ARIAL";
+        public Double sizeBloque = 40.0;
 
         public void aplicarDefault(int indice)
         {
             coloresTextoSi.remove(indice);
             coloresSi.remove(indice);
             figurasSi.remove(indice);
+            fuentesSi.remove(indice);
+            sizesSi.remove(indice);
             coloresTextoMientras.remove(indice);
             coloresMientras.remove(indice);
             figurasMientras.remove(indice);
+            fuentesMientras.remove(indice);
+            sizesMientras.remove(indice);
             coloresTextoBloque.remove(indice);
             coloresBloques.remove(indice);
             figurasBloque.remove(indice);
+            fuentesBloque.remove(indice);
+            sizesBloques.remove(indice);
         }
     }
 
@@ -684,10 +702,10 @@ figura ::=
     ;
 
 fuente ::=
-    FONT_ARIAL
-    | FONT_TIMES
-    | FONT_COMIC
-    | FONT_VERDANA
+    FONT_ARIAL {: RESULT = "ARIAL"; :}
+    | FONT_TIMES {: RESULT = "TIMES_NEW_ROMAN"; :}
+    | FONT_COMIC {: RESULT = "COMIC_SANS"; :}
+    | FONT_VERDANA {: RESULT = "VERDANA"; :}
     ;
 
 configuracion ::=
@@ -745,8 +763,17 @@ configuracion ::=
             parser.config.figuraSi = f;
         }
     :}
-    | CONF_LETRA_SI IGUAL_ASIG fuente indice_opt
-    | CONF_LETRA_SIZE_SI IGUAL_ASIG expr_aritmetica indice_opt
+    | CONF_LETRA_SI IGUAL_ASIG fuente:f indice_opt:idx
+    {:
+        if (idx != null && idx > 0) parser.config.fuentesSi.put(idx, f);
+        else parser.config.fuenteSi = f;
+    :}
+    | CONF_LETRA_SIZE_SI IGUAL_ASIG expr_aritmetica:e indice_opt:idx
+    {:
+        double size = parser.evaluarExpresion(e);
+        if (idx != null && idx > 0) parser.config.sizesSi.put(idx, size);
+        else parser.config.sizeSi = size;
+    :}
     | CONF_COLOR_TEXT_MIENTRAS IGUAL_ASIG expr_color:c indice_opt:idx
     {:
         if (idx != null && idx > 0)
@@ -791,8 +818,17 @@ configuracion ::=
             parser.config.figuraMientras = f;
         }
     :}
-    | CONF_LETRA_MIENTRAS IGUAL_ASIG fuente indice_opt
-    | CONF_LETRA_SIZE_MIENTRAS IGUAL_ASIG expr_aritmetica indice_opt
+    | CONF_LETRA_MIENTRAS IGUAL_ASIG fuente:f indice_opt:idx
+    {:
+        if (idx != null && idx > 0) parser.config.fuentesMientras.put(idx, f);
+        else parser.config.fuenteMientras = f;
+    :}
+    | CONF_LETRA_SIZE_MIENTRAS IGUAL_ASIG expr_aritmetica:e indice_opt:idx
+    {:
+        double size = parser.evaluarExpresion(e);
+        if (idx != null && idx > 0) parser.config.sizesMientras.put(idx, size);
+        else parser.config.sizeMientras = size;
+    :}
     | CONF_COLOR_TEXT_BLOQUE IGUAL_ASIG expr_color:c indice_opt:idx
     {:
         if (idx != null && idx > 0)
@@ -837,8 +873,17 @@ configuracion ::=
             parser.config.figuraBloque = f;
         }
     :}
-    | CONF_LETRA_BLOQUE IGUAL_ASIG fuente indice_opt
-    | CONF_LETRA_SIZE_BLOQUE IGUAL_ASIG expr_aritmetica indice_opt
+    | CONF_LETRA_BLOQUE IGUAL_ASIG fuente:f indice_opt:idx
+    {:
+        if (idx != null && idx > 0) parser.config.fuentesBloque.put(idx, f);
+        else parser.config.fuenteBloque = f;
+    :}
+    | CONF_LETRA_SIZE_BLOQUE IGUAL_ASIG expr_aritmetica:e indice_opt:idx
+    {:
+        double size = parser.evaluarExpresion(e);
+        if (idx != null && idx > 0) parser.config.sizesBloques.put(idx, size);
+        else parser.config.sizeBloque = size;
+    :}
     | error
     {:
         parser.listaErrores.add(new Parser.ErrorSintactico(

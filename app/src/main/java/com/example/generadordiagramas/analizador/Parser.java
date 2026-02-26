@@ -676,38 +676,56 @@ public class Parser extends java_cup.runtime.lr_parser {
         public java.util.HashMap<Integer, String> coloresTextoSi = new java.util.HashMap<>();
         public java.util.HashMap<Integer, String> coloresSi = new java.util.HashMap<>();
         public java.util.HashMap<Integer, String> figurasSi = new java.util.HashMap<>();
+        public java.util.HashMap<Integer, String> fuentesSi = new java.util.HashMap<>();
+        public java.util.HashMap<Integer, Double> sizesSi = new java.util.HashMap<>();
 
         public java.util.HashMap<Integer, String> coloresTextoMientras = new java.util.HashMap<>();
         public java.util.HashMap<Integer, String> coloresMientras = new java.util.HashMap<>();
         public java.util.HashMap<Integer, String> figurasMientras = new java.util.HashMap<>();
+        public java.util.HashMap<Integer, String> fuentesMientras = new java.util.HashMap<>();
+        public java.util.HashMap<Integer, Double> sizesMientras = new java.util.HashMap<>();
 
         public java.util.HashMap<Integer, String> coloresTextoBloque = new java.util.HashMap<>();
         public java.util.HashMap<Integer, String> coloresBloques = new java.util.HashMap<>();
         public java.util.HashMap<Integer, String> figurasBloque = new java.util.HashMap<>();
+        public java.util.HashMap<Integer, String> fuentesBloque = new java.util.HashMap<>();
+        public java.util.HashMap<Integer, Double> sizesBloques = new java.util.HashMap<>();
 
         public String colorTextoSi = "#000000";
         public String colorSi = "#CE93D8";
         public String figuraSi = "ROMBO";
+        public String fuenteSi = "ARIAL";
+        public Double sizeSi = 40.0;
 
         public String colorTextoMientras = "#000000";
         public String colorMientras = "#CE93D8";
         public String figuraMientras = "ROMBO";
+        public String fuenteMientras = "ARIAL";
+        public Double sizeMientras = 40.0;
 
         public String colorTextoBloque = "#000000";
         public String colorBloque = "#90CAF9";
         public String figuraBloque = "RECTANGULO";
+        public String fuenteBloque = "ARIAL";
+        public Double sizeBloque = 40.0;
 
         public void aplicarDefault(int indice)
         {
             coloresTextoSi.remove(indice);
             coloresSi.remove(indice);
             figurasSi.remove(indice);
+            fuentesSi.remove(indice);
+            sizesSi.remove(indice);
             coloresTextoMientras.remove(indice);
             coloresMientras.remove(indice);
             figurasMientras.remove(indice);
+            fuentesMientras.remove(indice);
+            sizesMientras.remove(indice);
             coloresTextoBloque.remove(indice);
             coloresBloques.remove(indice);
             figurasBloque.remove(indice);
+            fuentesBloque.remove(indice);
+            sizesBloques.remove(indice);
         }
     }
 
@@ -1973,7 +1991,7 @@ class CUP$Parser$actions {
           case 70: // fuente ::= FONT_ARIAL 
             {
               String RESULT =null;
-
+		 RESULT = "ARIAL"; 
               CUP$Parser$result = parser.getSymbolFactory().newSymbol("fuente",19, ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), RESULT);
             }
           return CUP$Parser$result;
@@ -1982,7 +2000,7 @@ class CUP$Parser$actions {
           case 71: // fuente ::= FONT_TIMES 
             {
               String RESULT =null;
-
+		 RESULT = "TIMES_NEW_ROMAN"; 
               CUP$Parser$result = parser.getSymbolFactory().newSymbol("fuente",19, ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), RESULT);
             }
           return CUP$Parser$result;
@@ -1991,7 +2009,7 @@ class CUP$Parser$actions {
           case 72: // fuente ::= FONT_COMIC 
             {
               String RESULT =null;
-
+		 RESULT = "COMIC_SANS"; 
               CUP$Parser$result = parser.getSymbolFactory().newSymbol("fuente",19, ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), RESULT);
             }
           return CUP$Parser$result;
@@ -2000,7 +2018,7 @@ class CUP$Parser$actions {
           case 73: // fuente ::= FONT_VERDANA 
             {
               String RESULT =null;
-
+		 RESULT = "VERDANA"; 
               CUP$Parser$result = parser.getSymbolFactory().newSymbol("fuente",19, ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), RESULT);
             }
           return CUP$Parser$result;
@@ -2135,7 +2153,16 @@ class CUP$Parser$actions {
           case 80: // configuracion ::= CONF_LETRA_SI IGUAL_ASIG fuente indice_opt 
             {
               Object RESULT =null;
-
+		int fleft = ((java_cup.runtime.Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-1)).left;
+		int fright = ((java_cup.runtime.Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-1)).right;
+		String f = (String)((java_cup.runtime.Symbol) CUP$Parser$stack.elementAt(CUP$Parser$top-1)).value;
+		int idxleft = ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()).left;
+		int idxright = ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()).right;
+		Integer idx = (Integer)((java_cup.runtime.Symbol) CUP$Parser$stack.peek()).value;
+		
+        if (idx != null && idx > 0) parser.config.fuentesSi.put(idx, f);
+        else parser.config.fuenteSi = f;
+    
               CUP$Parser$result = parser.getSymbolFactory().newSymbol("configuracion",16, ((java_cup.runtime.Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-3)), ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), RESULT);
             }
           return CUP$Parser$result;
@@ -2144,7 +2171,17 @@ class CUP$Parser$actions {
           case 81: // configuracion ::= CONF_LETRA_SIZE_SI IGUAL_ASIG expr_aritmetica indice_opt 
             {
               Object RESULT =null;
-
+		int eleft = ((java_cup.runtime.Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-1)).left;
+		int eright = ((java_cup.runtime.Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-1)).right;
+		String e = (String)((java_cup.runtime.Symbol) CUP$Parser$stack.elementAt(CUP$Parser$top-1)).value;
+		int idxleft = ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()).left;
+		int idxright = ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()).right;
+		Integer idx = (Integer)((java_cup.runtime.Symbol) CUP$Parser$stack.peek()).value;
+		
+        double size = parser.evaluarExpresion(e);
+        if (idx != null && idx > 0) parser.config.sizesSi.put(idx, size);
+        else parser.config.sizeSi = size;
+    
               CUP$Parser$result = parser.getSymbolFactory().newSymbol("configuracion",16, ((java_cup.runtime.Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-3)), ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), RESULT);
             }
           return CUP$Parser$result;
@@ -2249,7 +2286,16 @@ class CUP$Parser$actions {
           case 86: // configuracion ::= CONF_LETRA_MIENTRAS IGUAL_ASIG fuente indice_opt 
             {
               Object RESULT =null;
-
+		int fleft = ((java_cup.runtime.Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-1)).left;
+		int fright = ((java_cup.runtime.Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-1)).right;
+		String f = (String)((java_cup.runtime.Symbol) CUP$Parser$stack.elementAt(CUP$Parser$top-1)).value;
+		int idxleft = ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()).left;
+		int idxright = ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()).right;
+		Integer idx = (Integer)((java_cup.runtime.Symbol) CUP$Parser$stack.peek()).value;
+		
+        if (idx != null && idx > 0) parser.config.fuentesMientras.put(idx, f);
+        else parser.config.fuenteMientras = f;
+    
               CUP$Parser$result = parser.getSymbolFactory().newSymbol("configuracion",16, ((java_cup.runtime.Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-3)), ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), RESULT);
             }
           return CUP$Parser$result;
@@ -2258,7 +2304,17 @@ class CUP$Parser$actions {
           case 87: // configuracion ::= CONF_LETRA_SIZE_MIENTRAS IGUAL_ASIG expr_aritmetica indice_opt 
             {
               Object RESULT =null;
-
+		int eleft = ((java_cup.runtime.Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-1)).left;
+		int eright = ((java_cup.runtime.Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-1)).right;
+		String e = (String)((java_cup.runtime.Symbol) CUP$Parser$stack.elementAt(CUP$Parser$top-1)).value;
+		int idxleft = ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()).left;
+		int idxright = ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()).right;
+		Integer idx = (Integer)((java_cup.runtime.Symbol) CUP$Parser$stack.peek()).value;
+		
+        double size = parser.evaluarExpresion(e);
+        if (idx != null && idx > 0) parser.config.sizesMientras.put(idx, size);
+        else parser.config.sizeMientras = size;
+    
               CUP$Parser$result = parser.getSymbolFactory().newSymbol("configuracion",16, ((java_cup.runtime.Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-3)), ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), RESULT);
             }
           return CUP$Parser$result;
@@ -2363,7 +2419,16 @@ class CUP$Parser$actions {
           case 92: // configuracion ::= CONF_LETRA_BLOQUE IGUAL_ASIG fuente indice_opt 
             {
               Object RESULT =null;
-
+		int fleft = ((java_cup.runtime.Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-1)).left;
+		int fright = ((java_cup.runtime.Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-1)).right;
+		String f = (String)((java_cup.runtime.Symbol) CUP$Parser$stack.elementAt(CUP$Parser$top-1)).value;
+		int idxleft = ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()).left;
+		int idxright = ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()).right;
+		Integer idx = (Integer)((java_cup.runtime.Symbol) CUP$Parser$stack.peek()).value;
+		
+        if (idx != null && idx > 0) parser.config.fuentesBloque.put(idx, f);
+        else parser.config.fuenteBloque = f;
+    
               CUP$Parser$result = parser.getSymbolFactory().newSymbol("configuracion",16, ((java_cup.runtime.Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-3)), ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), RESULT);
             }
           return CUP$Parser$result;
@@ -2372,7 +2437,17 @@ class CUP$Parser$actions {
           case 93: // configuracion ::= CONF_LETRA_SIZE_BLOQUE IGUAL_ASIG expr_aritmetica indice_opt 
             {
               Object RESULT =null;
-
+		int eleft = ((java_cup.runtime.Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-1)).left;
+		int eright = ((java_cup.runtime.Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-1)).right;
+		String e = (String)((java_cup.runtime.Symbol) CUP$Parser$stack.elementAt(CUP$Parser$top-1)).value;
+		int idxleft = ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()).left;
+		int idxright = ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()).right;
+		Integer idx = (Integer)((java_cup.runtime.Symbol) CUP$Parser$stack.peek()).value;
+		
+        double size = parser.evaluarExpresion(e);
+        if (idx != null && idx > 0) parser.config.sizesBloques.put(idx, size);
+        else parser.config.sizeBloque = size;
+    
               CUP$Parser$result = parser.getSymbolFactory().newSymbol("configuracion",16, ((java_cup.runtime.Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-3)), ((java_cup.runtime.Symbol)CUP$Parser$stack.peek()), RESULT);
             }
           return CUP$Parser$result;
