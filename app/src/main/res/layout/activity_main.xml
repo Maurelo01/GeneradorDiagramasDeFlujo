@@ -19,7 +19,7 @@
     <EditText
         android:id="@+id/etCodigo"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="0dp"
         android:layout_weight="0.5"
         android:ems="10"
         android:gravity="start|top"
@@ -42,10 +42,27 @@
         android:text="Ver Reportes de Errores"
         android:visibility="gone" />
 
-    <com.example.generadordiagramas.VistaDiagrama
-        android:id="@+id/lienzoDiagrama"
+    <ScrollView
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_weight="1" />
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:layout_marginTop="16dp">
+
+        <HorizontalScrollView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content">
+
+            <FrameLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content">
+
+                <com.example.generadordiagramas.VistaDiagrama
+                    android:id="@+id/lienzoDiagrama"
+                    android:layout_width="1200dp"
+                    android:layout_height="1500dp"
+                    android:background="#E0E0E0" />
+            </FrameLayout>
+        </HorizontalScrollView>
+    </ScrollView>
 
 </LinearLayout>
