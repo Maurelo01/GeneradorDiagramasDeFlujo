@@ -56,16 +56,36 @@ class VistaDiagrama @JvmOverloads constructor(contexto: Context, atributos: Attr
     private fun interpretarColor(colorStr: String?, colorDefaultHex: String): Int
     {
         if (colorStr == null) return Color.parseColor(colorDefaultHex)
-        return try {
-            if (colorStr.startsWith("H")) {
+        return try
+        {
+            if (colorStr.startsWith("H"))
+            {
                 Color.parseColor("#" + colorStr.substring(1))
-            } else if (colorStr.startsWith("#")) {
+            }
+            else if (colorStr.startsWith("#"))
+            {
                 Color.parseColor(colorStr)
-            } else {
+            }
+            else
+            {
                 Color.parseColor(colorDefaultHex)
             }
-        } catch (e: Exception) {
+        }
+        catch (e: Exception)
+        {
             Color.parseColor(colorDefaultHex)
+        }
+    }
+
+    private fun obtenerFuente(nombreFuente: String?): android.graphics.Typeface
+    {
+        return when (nombreFuente)
+        {
+            "ARIAL" -> android.graphics.Typeface.SANS_SERIF
+            "TIMES_NEW_ROMAN" -> android.graphics.Typeface.SERIF
+            "COMIC_SANS" -> android.graphics.Typeface.create("casual", android.graphics.Typeface.NORMAL)
+            "VERDANA" -> android.graphics.Typeface.SANS_SERIF
+            else -> android.graphics.Typeface.DEFAULT
         }
     }
 
@@ -73,8 +93,8 @@ class VistaDiagrama @JvmOverloads constructor(contexto: Context, atributos: Attr
     {
         val altoFigura = abajo - arriba
         val rutaPoligono = Path()
-
-        when (figura ?: "RECTANGULO") {
+        when (figura ?: "RECTANGULO")
+        {
             "ELIPSE", "CIRCULO" -> {
                 lienzo.drawOval(izquierda, arriba, derecha, abajo, pincelRelleno)
                 lienzo.drawOval(izquierda, arriba, derecha, abajo, pincelBorde)
@@ -117,7 +137,6 @@ class VistaDiagrama @JvmOverloads constructor(contexto: Context, atributos: Attr
         val altoFigura = 120f
         val espacioVertical = 120f
         val cv = configVisual ?: ConfiguracionVisual()
-
         for (i in lista.indices)
         {
             val nodo = lista[i]
@@ -125,8 +144,8 @@ class VistaDiagrama @JvmOverloads constructor(contexto: Context, atributos: Attr
             val arriba = yActual
             val derecha = x + (anchoFigura / 2)
             val abajo = yActual + altoFigura
-
-            when (nodo.tipoForma) {
+            when (nodo.tipoForma)
+            {
                 "INICIO", "FIN" -> {
                     pincelRelleno.color = Color.parseColor("#A5D6A7")
                     pincelTexto.color = Color.BLACK
@@ -138,7 +157,10 @@ class VistaDiagrama @JvmOverloads constructor(contexto: Context, atributos: Attr
                     val colorFondo = cv.coloresBloques[idx] ?: cv.colorBloque
                     val colorTexto = cv.coloresTextoBloque[idx] ?: cv.colorTextoBloque
                     val figura = cv.figurasBloque[idx] ?: cv.figuraBloque
-
+                    val fuente = cv.fuentesBloque[idx] ?: cv.fuenteBloque
+                    val tamaño = cv.sizesBloques[idx] ?: cv.sizeBloque
+                    pincelTexto.typeface = obtenerFuente(fuente)
+                    pincelTexto.textSize = tamaño.toFloat()
                     pincelRelleno.color = interpretarColor(colorFondo, "#90CAF9")
                     pincelTexto.color = interpretarColor(colorTexto, "#000000")
                     dibujarFormaDinamica(lienzo, figura, izquierda, arriba, derecha, abajo, x)
@@ -151,20 +173,28 @@ class VistaDiagrama @JvmOverloads constructor(contexto: Context, atributos: Attr
                 "CONDICION" -> {
                     val esMientras = nodo.textoVisible.startsWith("MIENTRAS")
                     val idx = nodo.indiceElemento
-
-                    if (esMientras) {
+                    if (esMientras)
+                    {
                         val colorFondo = cv.coloresMientras[idx] ?: cv.colorMientras
                         val colorTexto = cv.coloresTextoMientras[idx] ?: cv.colorTextoMientras
                         val figura = cv.figurasMientras[idx] ?: cv.figuraMientras
-
+                        val fuente = cv.fuentesMientras[idx] ?: cv.fuenteMientras
+                        val tamaño = cv.sizesMientras[idx] ?: cv.sizeMientras
+                        pincelTexto.typeface = obtenerFuente(fuente)
+                        pincelTexto.textSize = tamaño.toFloat()
                         pincelRelleno.color = interpretarColor(colorFondo, "#CE93D8")
                         pincelTexto.color = interpretarColor(colorTexto, "#000000")
                         dibujarFormaDinamica(lienzo, figura, izquierda, arriba, derecha, abajo, x)
-                    } else {
+                    }
+                    else
+                    {
                         val colorFondo = cv.coloresSi[idx] ?: cv.colorSi
                         val colorTexto = cv.coloresTextoSi[idx] ?: cv.colorTextoSi
                         val figura = cv.figurasSi[idx] ?: cv.figuraSi
-
+                        val fuente = cv.fuentesSi[idx] ?: cv.fuenteSi
+                        val tamaño = cv.sizesSi[idx] ?: cv.sizeSi
+                        pincelTexto.typeface = obtenerFuente(fuente)
+                        pincelTexto.textSize = tamaño.toFloat()
                         pincelRelleno.color = interpretarColor(colorFondo, "#CE93D8")
                         pincelTexto.color = interpretarColor(colorTexto, "#000000")
                         dibujarFormaDinamica(lienzo, figura, izquierda, arriba, derecha, abajo, x)

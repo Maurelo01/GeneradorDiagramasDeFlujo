@@ -147,103 +147,80 @@ class MainActivity : AppCompatActivity()
 
     private fun mostrarReporteErrores()
     {
-        if (erroresCompletos.isEmpty())
-        {
-            Toast.makeText(this, "No hay errores para mostrar", Toast.LENGTH_SHORT).show()
-            return
+        if (erroresCompletos.isEmpty()) return
+        val tabla = TableLayout(this).apply {
+            isStretchAllColumns = true
+            setBackgroundColor(android.graphics.Color.BLACK)
         }
-
-        val reporte = StringBuilder()
-        reporte.append("REPORTE DE ERRORES\n")
-        reporte.append("=".repeat(42) + "\n\n")
-        reporte.append(String.format("%-20s %-8s %-10s %-15s %s\n", "Lexema", "Línea", "Columna", "Tipo", "Descripción"))
-        reporte.append("-".repeat(42) + "\n")
+        tabla.addView(crearFilaTabla(true, "Lexema", "Línea", "Col", "Tipo", "Descripción"))
         for (error in erroresCompletos)
         {
-            reporte.append(String.format("%-20s %-8d %-10d %-15s %s\n", error.lexema.take(20), error.linea, error.columna, error.tipo, error.descripcion))
+            tabla.addView(crearFilaTabla(false, error.lexema, error.linea.toString(), error.columna.toString(), error.tipo, error.descripcion))
         }
-
-        reporte.append("\n")
-        reporte.append("Total de errores: ${erroresCompletos.size}\n")
-        reporte.append("  Léxicos: ${erroresCompletos.count { it.tipo == "Léxico" }}\n")
-        reporte.append("  Sintácticos: ${erroresCompletos.count { it.tipo == "Sintáctico" }}")
-
-        mostrarDialogoReporte("Reporte de Errores", reporte.toString())
+        mostrarDialogoTabla("Reporte de Errores", tabla)
     }
 
     private fun mostrarReporteOperadores()
     {
-        if (parser == null || parser!!.listaOperadores.isEmpty())
-        {
-            Toast.makeText(this, "No hay operadores para mostrar", Toast.LENGTH_SHORT).show()
-            return
+        if (parser == null || parser!!.listaOperadores.isEmpty()) return
+        val tabla = TableLayout(this).apply {
+            isStretchAllColumns = true
+            setBackgroundColor(android.graphics.Color.BLACK)
         }
-
-        val reporte = StringBuilder()
-        reporte.append("REPORTE DE OPERADORES MATEMÁTICOS\n")
-        reporte.append("=".repeat(42) + "\n\n")
-        reporte.append(String.format("%-20s %-8s %-10s %s\n",
-            "Operador", "Línea", "Columna", "Ocurrencia"))
-        reporte.append("-".repeat(42) + "\n")
-
+        tabla.addView(crearFilaTabla(true, "Operador", "Línea", "Columna", "Ocurrencia"))
         for (op in parser!!.listaOperadores)
         {
-            reporte.append(String.format("%-20s %-8d %-10d %s\n", op.operador, op.linea, op.columna, op.ocurrencia))
+            tabla.addView(crearFilaTabla(false, op.operador, op.linea.toString(), op.columna.toString(), op.ocurrencia))
         }
-
-        reporte.append("\n")
-        reporte.append("Total de operadores: ${parser!!.listaOperadores.size}")
-
-        mostrarDialogoReporte("Reporte de Operadores Matemáticos", reporte.toString())
+        mostrarDialogoTabla("Reporte de Operadores", tabla)
     }
 
     private fun mostrarReporteControl()
     {
-        if (parser == null || parser!!.listaControl.isEmpty())
-        {
-            Toast.makeText(this, "No hay estructuras de control para mostrar", Toast.LENGTH_SHORT).show()
-            return
+        if (parser == null || parser!!.listaControl.isEmpty()) return
+        val tabla = TableLayout(this).apply {
+            isStretchAllColumns = true
+            setBackgroundColor(android.graphics.Color.BLACK)
         }
-
-        val reporte = StringBuilder()
-        reporte.append("REPORTE DE ESTRUCTURAS DE CONTROL\n")
-        reporte.append("=".repeat(42) + "\n\n")
-        reporte.append(String.format("%-20s %-8s %s\n",
-            "Objeto", "Línea", "Condición"))
-        reporte.append("-".repeat(42) + "\n")
-
+        tabla.addView(crearFilaTabla(true, "Objeto", "Línea", "Condición"))
         for (ctrl in parser!!.listaControl)
         {
-            reporte.append(String.format("%-20s %-8d %s\n", ctrl.objeto, ctrl.linea, ctrl.condicion))
+            tabla.addView(crearFilaTabla(false, ctrl.objeto, ctrl.linea.toString(), ctrl.condicion))
         }
-
-        reporte.append("\n")
-        reporte.append("Total de estructuras: ${parser!!.listaControl.size}")
-        mostrarDialogoReporte("Reporte de Estructuras de Control", reporte.toString())
+        mostrarDialogoTabla("Reporte Estructuras de Control", tabla)
+    }
+    private fun crearFilaTabla(esCabecera: Boolean, vararg textos: String): TableRow
+    {
+        val fila = TableRow(this)
+        fila.layoutParams = TableRow.LayoutParams(TableRow.LayoutParams.MATCH_PARENT, TableRow.LayoutParams.WRAP_CONTENT)
+        fila.setPadding(0, 0, 0, 2)
+        fila.setBackgroundColor(android.graphics.Color.BLACK)
+        val colorFondo = if (esCabecera) android.graphics.Color.LTGRAY else android.graphics.Color.WHITE
+        for (texto in textos)
+        {
+            val tv = TextView(this)
+            tv.text = texto
+            tv.setPadding(15, 15, 15, 15)
+            tv.setBackgroundColor(colorFondo)
+            tv.setTextColor(android.graphics.Color.BLACK)
+            if (esCabecera) tv.setTypeface(null, android.graphics.Typeface.BOLD)
+            val params = TableRow.LayoutParams(TableRow.LayoutParams.WRAP_CONTENT, TableRow.LayoutParams.MATCH_PARENT)
+            params.setMargins(1, 1, 1, 1)
+            fila.addView(tv, params)
+        }
+        return fila
     }
 
-    private fun mostrarDialogoReporte(titulo: String, contenido: String)
+    private fun mostrarDialogoTabla(titulo: String, tabla: TableLayout)
     {
         val builder = AlertDialog.Builder(this)
         builder.setTitle(titulo)
         val scrollView = ScrollView(this)
-        val textView = TextView(this)
-        textView.text = contenido
-        textView.setPadding(40, 40, 40, 40)
-        textView.textSize = 12f
-        textView.typeface = android.graphics.Typeface.MONOSPACE
-        scrollView.addView(textView)
+        val horizontalScroll = HorizontalScrollView(this)
+        horizontalScroll.addView(tabla)
+        scrollView.addView(horizontalScroll)
         builder.setView(scrollView)
-
-        builder.setPositiveButton("Cerrar") { dialog, _ ->
-            dialog.dismiss()
-        }
-        builder.setNeutralButton("Copiar") { _, _ ->
-            val clipboard = getSystemService(CLIPBOARD_SERVICE) as android.content.ClipboardManager
-            val clip = android.content.ClipData.newPlainText("Reporte", contenido)
-            clipboard.setPrimaryClip(clip)
-            Toast.makeText(this, "Reporte copiado", Toast.LENGTH_SHORT).show()
-        }
+        builder.setPositiveButton("Cerrar") { dialog, _ -> dialog.dismiss() }
         builder.create().show()
     }
 
