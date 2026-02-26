@@ -26,7 +26,6 @@ class MainActivity : AppCompatActivity()
     {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-
         inicializarVistas()
         configurarEventos()
     }
@@ -41,8 +40,6 @@ class MainActivity : AppCompatActivity()
         vistaDiagrama = findViewById(R.id.vistaDiagrama)
         scrollDiagrama = findViewById(R.id.scrollDiagrama)
         txtMensaje = findViewById(R.id.txtMensaje)
-
-        // Inicialmente deshabilitar botones de reportes
         btnReporteErrores.isEnabled = false
         btnReporteOperadores.isEnabled = false
         btnReporteControl.isEnabled = false
@@ -53,15 +50,12 @@ class MainActivity : AppCompatActivity()
         btnAnalizar.setOnClickListener {
             analizarCodigo()
         }
-
         btnReporteErrores.setOnClickListener {
             mostrarReporteErrores()
         }
-
         btnReporteOperadores.setOnClickListener {
             mostrarReporteOperadores()
         }
-
         btnReporteControl.setOnClickListener {
             mostrarReporteControl()
         }
@@ -70,10 +64,9 @@ class MainActivity : AppCompatActivity()
     private fun analizarCodigo()
     {
         val codigoEntrada = editTextoEntrada.text.toString()
-
         if (codigoEntrada.isEmpty())
         {
-            Toast.makeText(this, "Por favor ingrese código", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, "No has escrito el código aun", Toast.LENGTH_SHORT).show()
             return
         }
 
@@ -82,38 +75,32 @@ class MainActivity : AppCompatActivity()
             val lector = StringReader(codigoEntrada)
             val lexer = Lexer(lector)
             parser = Parser(lexer)
-
             // Realizar análisis
             val resultado = parser!!.parse()
             val diagrama = resultado.value as? ArrayList<FiguraDiagrama>
-
             // Verificar si hay errores
             if (parser!!.listaErrores.isEmpty())
             {
-                // No hay errores, Mostrar diagrama y habilitar reportes
+                // No hay errores, mostrar diagrama y habilitar reportes
                 vistaDiagrama.establecerDiagrama(diagrama ?: ArrayList(), parser!!.config)
                 scrollDiagrama.visibility = ScrollView.VISIBLE
                 txtMensaje.visibility = TextView.GONE
-
                 // Habilitar reportes de operadores y control
                 btnReporteErrores.isEnabled = false
                 btnReporteOperadores.isEnabled = true
                 btnReporteControl.isEnabled = true
-
                 Toast.makeText(this, "Análisis exitoso - ${diagrama?.size ?: 0} elementos", Toast.LENGTH_SHORT).show()
             }
             else
             {
-                // Hay errores No mostrar diagrama, solo reporte de errores
+                // Hay errores, no mostrar diagrama, solo reporte de errores
                 scrollDiagrama.visibility = ScrollView.GONE
                 txtMensaje.visibility = TextView.VISIBLE
                 txtMensaje.text = "Se encontraron ${parser!!.listaErrores.size} errores.\nPresione 'Reporte de Errores' para ver detalles."
-
                 // Solo habilitar reporte de errores
                 btnReporteErrores.isEnabled = true
                 btnReporteOperadores.isEnabled = false
                 btnReporteControl.isEnabled = false
-
                 Toast.makeText(this, "Se encontraron ${parser!!.listaErrores.size} errores", Toast.LENGTH_LONG).show()
             }
 
@@ -141,10 +128,9 @@ class MainActivity : AppCompatActivity()
 
         val reporte = StringBuilder()
         reporte.append("REPORTE DE ERRORES\n")
-        reporte.append("=".repeat(80) + "\n\n")
+        reporte.append("_".repeat(42) + "\n\n")
         reporte.append(String.format("%-20s %-8s %-10s %-15s %s\n", "Lexema", "Línea", "Columna", "Tipo", "Descripción"))
-        reporte.append("-".repeat(80) + "\n")
-
+        reporte.append("-".repeat(42) + "\n")
         for (error in parser!!.listaErrores)
         {
             reporte.append(String.format("%-20s %-8d %-10d %-15s %s\n", error.lexema.take(20), error.linea, error.columna, "Sintáctico", error.descripcion))
@@ -166,10 +152,10 @@ class MainActivity : AppCompatActivity()
 
         val reporte = StringBuilder()
         reporte.append("REPORTE DE OPERADORES MATEMÁTICOS\n")
-        reporte.append("=".repeat(80) + "\n\n")
+        reporte.append("_".repeat(42) + "\n\n")
         reporte.append(String.format("%-20s %-8s %-10s %s\n",
             "Operador", "Línea", "Columna", "Ocurrencia"))
-        reporte.append("-".repeat(80) + "\n")
+        reporte.append("-".repeat(42) + "\n")
 
         for (op in parser!!.listaOperadores)
         {
@@ -192,10 +178,10 @@ class MainActivity : AppCompatActivity()
 
         val reporte = StringBuilder()
         reporte.append("REPORTE DE ESTRUCTURAS DE CONTROL\n")
-        reporte.append("=".repeat(80) + "\n\n")
+        reporte.append("=".repeat(42) + "\n\n")
         reporte.append(String.format("%-20s %-8s %s\n",
             "Objeto", "Línea", "Condición"))
-        reporte.append("-".repeat(80) + "\n")
+        reporte.append("-".repeat(42) + "\n")
 
         for (ctrl in parser!!.listaControl)
         {
@@ -230,7 +216,7 @@ class MainActivity : AppCompatActivity()
             val clipboard = getSystemService(CLIPBOARD_SERVICE) as android.content.ClipboardManager
             val clip = android.content.ClipData.newPlainText("Reporte", contenido)
             clipboard.setPrimaryClip(clip)
-            Toast.makeText(this, "Reporte copiado al portapapeles", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, "Reporte copiado", Toast.LENGTH_SHORT).show()
         }
 
         builder.create().show()
