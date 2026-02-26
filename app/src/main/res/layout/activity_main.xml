@@ -25,13 +25,24 @@
         android:id="@+id/editTextoEntrada"
         android:layout_width="match_parent"
         android:layout_height="200dp"
-        android:gravity="top|start"
-        android:hint="INICIO\nVAR a = 10\nFIN\n%%%%\n%DEFAULT=1"
-        android:inputType="textMultiLine"
-        android:textSize="12sp"
-        android:fontFamily="monospace"
         android:background="@android:drawable/edit_text"
-        android:padding="8dp"/>
+        android:fontFamily="monospace"
+        android:gravity="top|start"
+        android:hint="INICIO\nMOSTRAR &quot;Hola Mundo&quot;\nFIN\n%%%%\n%DEFAULT=1"
+        android:inputType="textMultiLine"
+        android:padding="8dp"
+        android:textSize="12sp" />
+
+    <TextView
+        android:id="@+id/txtMensaje"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:padding="16dp"
+        android:text="Ingrese código y presione Analizar"
+        android:textColor="#666666"
+        android:textSize="14sp"
+        android:visibility="visible" />
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -45,8 +56,8 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="Analizar"
-            android:backgroundTint="#4CAF50"/>
+            android:backgroundTint="#8BC34A"
+            android:text="Analizar" />
 
     </LinearLayout>
 
@@ -60,60 +71,55 @@
             android:id="@+id/btnReporteErrores"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="Errores"
             android:layout_marginEnd="4dp"
-            android:textSize="12sp"
-            android:backgroundTint="#F44336"/>
+            android:layout_weight="1"
+            android:backgroundTint="#E91E63"
+            android:text="Errores"
+            android:textSize="12sp" />
 
         <Button
             android:id="@+id/btnReporteOperadores"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="Operadores"
             android:layout_marginEnd="4dp"
-            android:textSize="12sp"
-            android:backgroundTint="#2196F3"/>
+            android:layout_weight="1"
+            android:backgroundTint="#5D767A"
+            android:text="Operadores"
+            android:textSize="12sp" />
 
         <Button
             android:id="@+id/btnReporteControl"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
+            android:backgroundTint="#64ABB3"
             android:text="Control"
-            android:textSize="12sp"
-            android:backgroundTint="#FF9800"/>
+            android:textSize="12sp" />
 
     </LinearLayout>
-
-    <TextView
-        android:id="@+id/txtMensaje"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Ingrese código y presione Analizar"
-        android:textSize="14sp"
-        android:textColor="#666666"
-        android:gravity="center"
-        android:padding="16dp"
-        android:visibility="visible"/>
 
     <ScrollView
         android:id="@+id/scrollDiagrama"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
-        android:visibility="gone"
-        android:background="#F5F5F5">
+        android:layout_marginTop="16dp">
 
         <HorizontalScrollView
-            android:layout_width="match_parent"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content">
 
-            <com.example.generadordiagramas.VistaDiagrama
-                android:id="@+id/vistaDiagrama"
-                android:layout_width="2000dp"
-                android:layout_height="2000dp"/>
+            <FrameLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content">
+
+                <com.example.generadordiagramas.VistaDiagrama
+                    android:id="@+id/vistaDiagrama"
+                    android:layout_width="1200dp"
+                    android:layout_height="1500dp"
+                    android:background="#E0E0E0" />
+
+            </FrameLayout>
 
         </HorizontalScrollView>
     </ScrollView>
