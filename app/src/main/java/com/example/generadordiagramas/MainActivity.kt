@@ -34,7 +34,7 @@ class MainActivity : AppCompatActivity()
     private fun inicializarVistas()
     {
         editTextoEntrada = findViewById(R.id.editTextoEntrada)
-        btnAnalizar = findViewById(R.id.btnAnalizar)
+        btnAnalizar = findViewById(R.id.btnCompilar)
         btnReporteErrores = findViewById(R.id.btnReporteErrores)
         btnReporteOperadores = findViewById(R.id.btnReporteOperadores)
         btnReporteControl = findViewById(R.id.btnReporteControl)
