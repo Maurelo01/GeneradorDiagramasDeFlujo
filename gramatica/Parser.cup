@@ -3,13 +3,13 @@ import java.util.ArrayList;
 
 /***** CÓDIGO DE USUARIO *****/
 parser code {:
-    // Clase para errores sintácticos
     public static class ErrorSintactico
     {
         public String lexema;
         public int linea;
         public int columna;
         public String descripcion;
+        public String esperado;
 
         public ErrorSintactico(String lexema, int linea, int columna, String descripcion)
         {
@@ -17,10 +17,19 @@ parser code {:
             this.linea = linea;
             this.columna = columna;
             this.descripcion = descripcion;
+            this.esperado = "";
+        }
+
+        public ErrorSintactico(String lexema, int linea, int columna, String descripcion, String esperado)
+        {
+            this.lexema = lexema;
+            this.linea = linea;
+            this.columna = columna;
+            this.descripcion = descripcion;
+            this.esperado = esperado;
         }
     }
 
-    // Clase para reportes de operadores matemáticos
     public static class ReporteOperador
     {
         public String operador;
@@ -37,7 +46,6 @@ parser code {:
         }
     }
 
-    // Clase para reportes de estructuras de control
     public static class ReporteControl
     {
         public String objeto;
@@ -52,7 +60,6 @@ parser code {:
         }
     }
 
-    // Clase para configuración visual
     public static class ConfiguracionVisual
     {
         public java.util.HashMap<Integer, String> coloresTextoSi = new java.util.HashMap<>();
@@ -93,18 +100,27 @@ parser code {:
         }
     }
 
-    // Listas globales
     public ArrayList<ErrorSintactico> listaErrores = new ArrayList<>();
     public ArrayList<ReporteOperador> listaOperadores = new ArrayList<>();
     public ArrayList<ReporteControl> listaControl = new ArrayList<>();
     public ConfiguracionVisual config = new ConfiguracionVisual();
-
-    // Contadores para índices de elementos
     public int contadorSi = 0;
     public int contadorMientras = 0;
     public int contadorBloque = 0;
+    private java.util.Stack<ParentesisInfo> parentesisStack = new java.util.Stack<>();
 
-    // Métodos helper
+    public static class ParentesisInfo {
+        public int linea;
+        public int columna;
+        public String contexto;
+
+        public ParentesisInfo(int l, int c, String ctx) {
+            linea = l;
+            columna = c;
+            contexto = ctx;
+        }
+    }
+
     public void agregarOperador(String op, int l, int c, String oc)
     {
         listaOperadores.add(new ReporteOperador(op, l, c, oc));
@@ -115,15 +131,40 @@ parser code {:
         listaControl.add(new ReporteControl(obj, l, c));
     }
 
-    // Método para evaluar expresiones aritméticas
+    public void validarParentesis(int linea, int columna, String lexema, boolean esApertura)
+    {
+        if (esApertura)
+        {
+            parentesisStack.push(new ParentesisInfo(linea, columna, "condición"));
+        }
+        else
+        {
+            if (parentesisStack.isEmpty())
+            {
+                listaErrores.add(new ErrorSintactico(")", linea, columna, "Paréntesis de cierre sin apertura"));
+            }
+            else
+            {
+                parentesisStack.pop();
+            }
+        }
+    }
+
+    public void validarParentesisFinales()
+    {
+        while (!parentesisStack.isEmpty())
+        {
+            ParentesisInfo info = parentesisStack.pop();
+            listaErrores.add(new ErrorSintactico("(", info.linea, info.columna, "Paréntesis sin cerrar"));
+        }
+    }
+
     public double evaluarExpresion(String expr)
     {
         try
         {
-            // Eliminar espacios y paréntesis externos
             expr = expr.replaceAll("\\s+", "").replaceAll("[()]", "");
 
-            // Si es solo un número, retornarlo directamente
             try
             {
                 return Double.parseDouble(expr);
@@ -133,15 +174,12 @@ parser code {:
                 // Es una expresión, continuar evaluando
             }
 
-            // Evaluar multiplicación y división primero
             expr = evaluarMultDiv(expr);
-
-            // Evaluar suma y resta
             return evaluarSumaResta(expr);
         }
         catch (Exception e)
         {
-            System.err.println("Error evaluando expresión: " + expr + " - " + e.getMessage());
+            System.err.println("Error evaluando expresión: " + expr);
             return 0.0;
         }
     }
@@ -150,7 +188,6 @@ parser code {:
     {
         while (expr.contains("*") || expr.contains("/"))
         {
-            // Buscar primer operador de multiplicación o división
             int idxMul = expr.indexOf("*");
             int idxDiv = expr.indexOf("/");
 
@@ -172,18 +209,13 @@ parser code {:
                 break;
             }
 
-            // Extraer operandos
             double izq = extraerNumeroIzquierda(expr, idx);
             double der = extraerNumeroDerecha(expr, idx);
-
-            // Calcular resultado
             double resultado = (op == '*') ? izq * der : izq / der;
 
-            // Encontrar posiciones para reemplazar
             int posIzq = encontrarInicioNumero(expr, idx);
             int posDer = encontrarFinNumero(expr, idx + 1);
 
-            // Reemplazar en la expresión
             expr = expr.substring(0, posIzq) + resultado + expr.substring(posDer);
         }
         return expr;
@@ -212,12 +244,10 @@ parser code {:
             }
             else if (c == '-' && numero.length() == 0 && i == 0)
             {
-                // Número negativo al inicio
                 numero.append(c);
             }
         }
 
-        // Procesar último número
         if (numero.length() > 0)
         {
             double val = Double.parseDouble(numero.toString());
@@ -270,59 +300,56 @@ parser code {:
     }
 
     @Override
-    public void syntax_error(Symbol s)
+    public void syntax_error(Symbol cur_token)
     {
-        String lexema = s.value != null ? s.value.toString() : "Token desconocido";
-        listaErrores.add(new ErrorSintactico(lexema, s.left, s.right, "Se esperaba otro token"));
-        System.err.println("Error Sintáctico: " + lexema + " en línea " + s.left + " columna " + s.right);
+        String lexema = cur_token.value != null ? cur_token.value.toString() : "EOF";
+        int linea = cur_token.left;
+        int columna = cur_token.right;
+
+        String descripcion = "Error sintáctico: token inesperado '" + lexema + "'";
+
+        listaErrores.add(new ErrorSintactico(lexema, linea, columna, descripcion));
+        System.err.println("Error Sintáctico en línea " + linea + ", columna " + columna + ": " + descripcion);
     }
 
     @Override
-    public void unrecovered_syntax_error(Symbol s) throws java.lang.Exception
+    public void unrecovered_syntax_error(Symbol cur_token) throws java.lang.Exception
     {
-        String lexema = s.value != null ? s.value.toString() : "Token desconocido";
-        listaErrores.add(new ErrorSintactico(lexema, s.left, s.right, "Error sintáctico irrecuperable"));
-        System.err.println("Error Sintáctico Irrecuperable: " + lexema + " en línea " + s.left + " columna " + s.right);
+        validarParentesisFinales();
+
+        String lexema = cur_token.value != null ? cur_token.value.toString() : "EOF";
+
+        if (listaErrores.isEmpty() || !listaErrores.get(listaErrores.size() - 1).lexema.equals(lexema))
+        {
+            listaErrores.add(new ErrorSintactico(
+                lexema,
+                cur_token.left,
+                cur_token.right,
+                "Error sintáctico irrecuperable"
+            ));
+        }
+    }
+
+    @Override
+    public void report_error(String message, Object info)
+    {
+        // Silenciar mensajes por defecto
     }
 :}
 
 /***** TERMINALES ****/
-
-/* Palabras Reservadas */
 terminal String INICIO, FIN, VAR, SI, ENTONCES, MIENTRAS, HACER, MOSTRAR, LEER, FINSI, FINMIENTRAS;
 terminal String SEPARADOR;
-
-/* Configuraciones de SI */
 terminal String CONF_COLOR_TEXT_SI, CONF_COLOR_SI, CONF_FIGURA_SI, CONF_LETRA_SI, CONF_LETRA_SIZE_SI;
-
-/* Configuraciones de MIENTRAS */
 terminal String CONF_COLOR_TEXT_MIENTRAS, CONF_COLOR_MIENTRAS, CONF_FIGURA_MIENTRAS, CONF_LETRA_MIENTRAS, CONF_LETRA_SIZE_MIENTRAS;
-
-/* Configuraciones de BLOQUE */
 terminal String CONF_COLOR_TEXT_BLOQUE, CONF_COLOR_BLOQUE, CONF_FIGURA_BLOQUE, CONF_LETRA_BLOQUE, CONF_LETRA_SIZE_BLOQUE;
-
-/* Configuración Default */
 terminal String CONF_DEFAULT;
-
-/* Figuras permitidas */
 terminal String FIG_ELIPSE, FIG_CIRCULO, FIG_PARALELOGRAMO, FIG_RECTANGULO, FIG_ROMBO, FIG_REC_REDONDEADO;
-
-/* Fuentes permitidas */
 terminal String FONT_ARIAL, FONT_TIMES, FONT_COMIC, FONT_VERDANA;
-
-/* Operadores Aritméticos */
 terminal String MAS, MENOS, POR, DIV;
-
-/* Operadores Relacionales */
 terminal String IGUALDAD, DIFERENTE, MAYOR, MENOR, MAYOR_IGUAL, MENOR_IGUAL;
-
-/* Operadores Lógicos */
 terminal String AND, OR, NOT;
-
-/* Signos de Agrupación */
 terminal String IGUAL_ASIG, PAR_IZQ, PAR_DER, PIPE, COMA;
-
-/* Patrones */
 terminal String ENTERO, DECIMAL, ID, CADENA, COLOR_HEX;
 
 /***** NO TERMINALES *****/
@@ -349,6 +376,13 @@ start with programa;
 programa ::=
     seccion_algoritmo:lista SEPARADOR seccion_configuracion
     {: RESULT = lista; :}
+    | seccion_algoritmo:lista error
+    {:
+        parser.listaErrores.add(new Parser.ErrorSintactico(
+            "SEPARADOR", 0, 0, "Se esperaba '%%%%' después del algoritmo"
+        ));
+        RESULT = lista;
+    :}
     ;
 
 seccion_algoritmo ::=
@@ -359,6 +393,20 @@ seccion_algoritmo ::=
         diagrama.addAll(lista);
         diagrama.add(new FiguraDiagrama("FIN", "FIN"));
         RESULT = diagrama;
+    :}
+    | error instrucciones FIN
+    {:
+        parser.listaErrores.add(new Parser.ErrorSintactico(
+            "INICIO", 0, 0, "Se esperaba 'INICIO' al comienzo"
+        ));
+        RESULT = new ArrayList<FiguraDiagrama>();
+    :}
+    | INICIO instrucciones error
+    {:
+        parser.listaErrores.add(new Parser.ErrorSintactico(
+            "FIN", 0, 0, "Se esperaba 'FIN' al final del algoritmo"
+        ));
+        RESULT = new ArrayList<FiguraDiagrama>();
     :}
     ;
 
@@ -418,6 +466,13 @@ declaracion ::=
         nodo.indiceElemento = parser.contadorBloque;
         RESULT = nodo;
     :}
+    | VAR error
+    {:
+        parser.listaErrores.add(new Parser.ErrorSintactico(
+            "VAR", 0, 0, "Se esperaba identificador después de VAR"
+        ));
+        RESULT = new FiguraDiagrama("PROCESO", "/* error */");
+    :}
     ;
 
 asignacion ::=
@@ -428,6 +483,13 @@ asignacion ::=
         nodo.indiceElemento = parser.contadorBloque;
         RESULT = nodo;
     :}
+    | ID:id error
+    {:
+        parser.listaErrores.add(new Parser.ErrorSintactico(
+            id, 0, 0, "Se esperaba '=' después del identificador"
+        ));
+        RESULT = new FiguraDiagrama("PROCESO", "/* error */");
+    :}
     ;
 
 mostrar ::=
@@ -435,37 +497,79 @@ mostrar ::=
     {: RESULT = new FiguraDiagrama("IO", "MOSTRAR " + c); :}
     | MOSTRAR expr_aritmetica:e
     {: RESULT = new FiguraDiagrama("IO", "MOSTRAR " + e); :}
+    | MOSTRAR error
+    {:
+        parser.listaErrores.add(new Parser.ErrorSintactico(
+            "MOSTRAR", 0, 0, "Se esperaba cadena o expresión después de MOSTRAR"
+        ));
+        RESULT = new FiguraDiagrama("IO", "MOSTRAR /* error */");
+    :}
     ;
 
 leer ::=
     LEER ID:id
     {: RESULT = new FiguraDiagrama("IO", "LEER " + id); :}
+    | LEER error
+    {:
+        parser.listaErrores.add(new Parser.ErrorSintactico(
+            "LEER", 0, 0, "Se esperaba identificador después de LEER"
+        ));
+        RESULT = new FiguraDiagrama("IO", "LEER /* error */");
+    :}
     ;
 
 cierre_si ::= FINSI | FIN SI ;
 cierre_mientras ::= FINMIENTRAS | FIN MIENTRAS ;
 
 condicional ::=
-    SI:s PAR_IZQ condicion:cond PAR_DER ENTONCES bloque_simple:bloque cierre_si
+    SI PAR_IZQ condicion:cond PAR_DER ENTONCES bloque_simple:bloque cierre_si
     {:
         parser.contadorSi++;
-        parser.agregarControl("SI", sleft, cond);
+        parser.agregarControl("SI", 0, cond);
         FiguraDiagrama nodoSi = new FiguraDiagrama("CONDICION", cond);
         nodoSi.bloqueInterno = bloque;
         nodoSi.indiceElemento = parser.contadorSi;
         RESULT = nodoSi;
     :}
+    | SI error ENTONCES bloque_simple cierre_si
+    {:
+        parser.listaErrores.add(new Parser.ErrorSintactico(
+            "SI", 0, 0, "Error en la condición del SI - Verifique paréntesis y operadores"
+        ));
+        RESULT = new FiguraDiagrama("CONDICION", "/* error */");
+    :}
+    | SI PAR_IZQ condicion PAR_DER ENTONCES bloque_simple error
+    {:
+        parser.listaErrores.add(new Parser.ErrorSintactico(
+            "FINSI", 0, 0, "Se esperaba FINSI o FIN SI"
+        ));
+        RESULT = new FiguraDiagrama("CONDICION", "/* error: falta cierre */");
+    :}
     ;
 
 ciclo ::=
-    MIENTRAS:m PAR_IZQ condicion:cond PAR_DER HACER bloque_simple:bloque cierre_mientras
+    MIENTRAS PAR_IZQ condicion:cond PAR_DER HACER bloque_simple:bloque cierre_mientras
     {:
         parser.contadorMientras++;
-        parser.agregarControl("MIENTRAS", mleft, cond);
+        parser.agregarControl("MIENTRAS", 0, cond);
         FiguraDiagrama nodoMientras = new FiguraDiagrama("CONDICION", "MIENTRAS " + cond);
         nodoMientras.bloqueInterno = bloque;
         nodoMientras.indiceElemento = parser.contadorMientras;
         RESULT = nodoMientras;
+    :}
+    | MIENTRAS error HACER bloque_simple cierre_mientras
+    {:
+        parser.listaErrores.add(new Parser.ErrorSintactico(
+            "MIENTRAS", 0, 0, "Error en la condición del MIENTRAS - Verifique paréntesis y operadores"
+        ));
+        RESULT = new FiguraDiagrama("CONDICION", "MIENTRAS /* error */");
+    :}
+    | MIENTRAS PAR_IZQ condicion PAR_DER HACER bloque_simple error
+    {:
+        parser.listaErrores.add(new Parser.ErrorSintactico(
+            "FINMIENTRAS", 0, 0, "Se esperaba FINMIENTRAS o FIN MIENTRAS"
+        ));
+        RESULT = new FiguraDiagrama("CONDICION", "MIENTRAS /* error: falta cierre */");
     :}
     ;
 
@@ -527,9 +631,15 @@ condicion ::=
     {: RESULT = "(" + c + ")"; :}
     ;
 
-seccion_configuracion ::= configuraciones ;
+seccion_configuracion ::=
+    configuraciones
+    | /* vacío - configuración opcional */
+    ;
 
-configuraciones ::= configuraciones configuracion | configuracion ;
+configuraciones ::=
+    configuraciones configuracion
+    | configuracion
+    ;
 
 indice_opt ::=
     PIPE expr_aritmetica:e
@@ -573,7 +683,12 @@ figura ::=
     | FIG_REC_REDONDEADO:f {: RESULT = "RECTANGULO_REDONDEADO"; :}
     ;
 
-fuente ::= FONT_ARIAL | FONT_TIMES | FONT_COMIC | FONT_VERDANA ;
+fuente ::=
+    FONT_ARIAL
+    | FONT_TIMES
+    | FONT_COMIC
+    | FONT_VERDANA
+    ;
 
 configuracion ::=
     CONF_DEFAULT IGUAL_ASIG expr_aritmetica:e
@@ -725,4 +840,9 @@ configuracion ::=
     | CONF_LETRA_BLOQUE IGUAL_ASIG fuente indice_opt
     | CONF_LETRA_SIZE_BLOQUE IGUAL_ASIG expr_aritmetica indice_opt
     | error
+    {:
+        parser.listaErrores.add(new Parser.ErrorSintactico(
+            "configuración", 0, 0, "Instrucción de configuración inválida"
+        ));
+    :}
     ;

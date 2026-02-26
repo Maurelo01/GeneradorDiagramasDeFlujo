@@ -19,8 +19,9 @@ class MainActivity : AppCompatActivity()
     private lateinit var vistaDiagrama: VistaDiagrama
     private lateinit var scrollDiagrama: ScrollView
     private lateinit var txtMensaje: TextView
-
     private var parser: Parser? = null
+    private var lexer: Lexer? = null
+    private var erroresCompletos: ArrayList<ErrorCompleto> = ArrayList()
 
     override fun onCreate(savedInstanceState: Bundle?)
     {
@@ -73,13 +74,39 @@ class MainActivity : AppCompatActivity()
         try
         {
             val lector = StringReader(codigoEntrada)
-            val lexer = Lexer(lector)
-            parser = Parser(lexer)
+            lexer = Lexer(lector)
+            parser = Parser(lexer!!)
             // Realizar análisis
             val resultado = parser!!.parse()
             val diagrama = resultado.value as? ArrayList<FiguraDiagrama>
+            // Combinar errores léxicos y sintácticos
+            erroresCompletos.clear()
+            // Agregar errores léxicos
+            for (errorLex in lexer!!.listaErrores)
+            {
+                erroresCompletos.add(ErrorCompleto(
+                    errorLex.lexema,
+                    errorLex.linea,
+                    errorLex.columna,
+                    "Léxico",
+                    errorLex.descripcion
+                ))
+            }
+            // Agregar errores sintácticos
+            for (errorSin in parser!!.listaErrores)
+            {
+                erroresCompletos.add(ErrorCompleto(
+                    errorSin.lexema,
+                    errorSin.linea,
+                    errorSin.columna,
+                    "Sintáctico",
+                    errorSin.descripcion
+                ))
+            }
+            // Ordenar por línea y columna
+            erroresCompletos.sortWith(compareBy({ it.linea }, { it.columna }))
             // Verificar si hay errores
-            if (parser!!.listaErrores.isEmpty())
+            if (erroresCompletos.isEmpty())
             {
                 // No hay errores, mostrar diagrama y habilitar reportes
                 vistaDiagrama.establecerDiagrama(diagrama ?: ArrayList(), parser!!.config)
@@ -96,12 +123,12 @@ class MainActivity : AppCompatActivity()
                 // Hay errores, no mostrar diagrama, solo reporte de errores
                 scrollDiagrama.visibility = ScrollView.GONE
                 txtMensaje.visibility = TextView.VISIBLE
-                txtMensaje.text = "Se encontraron ${parser!!.listaErrores.size} errores.\nPresione 'Reporte de Errores' para ver detalles."
+                txtMensaje.text = "Se encontraron ${erroresCompletos.size} errores.\nPresione 'Reporte de Errores' para ver detalles."
                 // Solo habilitar reporte de errores
                 btnReporteErrores.isEnabled = true
                 btnReporteOperadores.isEnabled = false
                 btnReporteControl.isEnabled = false
-                Toast.makeText(this, "Se encontraron ${parser!!.listaErrores.size} errores", Toast.LENGTH_LONG).show()
+                Toast.makeText(this, "Se encontraron ${erroresCompletos.size} errores", Toast.LENGTH_LONG).show()
             }
 
         }
@@ -120,7 +147,7 @@ class MainActivity : AppCompatActivity()
 
     private fun mostrarReporteErrores()
     {
-        if (parser == null || parser!!.listaErrores.isEmpty())
+        if (erroresCompletos.isEmpty())
         {
             Toast.makeText(this, "No hay errores para mostrar", Toast.LENGTH_SHORT).show()
             return
@@ -128,16 +155,18 @@ class MainActivity : AppCompatActivity()
 
         val reporte = StringBuilder()
         reporte.append("REPORTE DE ERRORES\n")
-        reporte.append("_".repeat(42) + "\n\n")
+        reporte.append("=".repeat(42) + "\n\n")
         reporte.append(String.format("%-20s %-8s %-10s %-15s %s\n", "Lexema", "Línea", "Columna", "Tipo", "Descripción"))
         reporte.append("-".repeat(42) + "\n")
-        for (error in parser!!.listaErrores)
+        for (error in erroresCompletos)
         {
-            reporte.append(String.format("%-20s %-8d %-10d %-15s %s\n", error.lexema.take(20), error.linea, error.columna, "Sintáctico", error.descripcion))
+            reporte.append(String.format("%-20s %-8d %-10d %-15s %s\n", error.lexema.take(20), error.linea, error.columna, error.tipo, error.descripcion))
         }
 
         reporte.append("\n")
-        reporte.append("Total de errores: ${parser!!.listaErrores.size}")
+        reporte.append("Total de errores: ${erroresCompletos.size}\n")
+        reporte.append("  Léxicos: ${erroresCompletos.count { it.tipo == "Léxico" }}\n")
+        reporte.append("  Sintácticos: ${erroresCompletos.count { it.tipo == "Sintáctico" }}")
 
         mostrarDialogoReporte("Reporte de Errores", reporte.toString())
     }
@@ -152,7 +181,7 @@ class MainActivity : AppCompatActivity()
 
         val reporte = StringBuilder()
         reporte.append("REPORTE DE OPERADORES MATEMÁTICOS\n")
-        reporte.append("_".repeat(42) + "\n\n")
+        reporte.append("=".repeat(42) + "\n\n")
         reporte.append(String.format("%-20s %-8s %-10s %s\n",
             "Operador", "Línea", "Columna", "Ocurrencia"))
         reporte.append("-".repeat(42) + "\n")
@@ -190,7 +219,6 @@ class MainActivity : AppCompatActivity()
 
         reporte.append("\n")
         reporte.append("Total de estructuras: ${parser!!.listaControl.size}")
-
         mostrarDialogoReporte("Reporte de Estructuras de Control", reporte.toString())
     }
 
@@ -198,14 +226,12 @@ class MainActivity : AppCompatActivity()
     {
         val builder = AlertDialog.Builder(this)
         builder.setTitle(titulo)
-
         val scrollView = ScrollView(this)
         val textView = TextView(this)
         textView.text = contenido
         textView.setPadding(40, 40, 40, 40)
         textView.textSize = 12f
         textView.typeface = android.graphics.Typeface.MONOSPACE
-
         scrollView.addView(textView)
         builder.setView(scrollView)
 
@@ -218,7 +244,14 @@ class MainActivity : AppCompatActivity()
             clipboard.setPrimaryClip(clip)
             Toast.makeText(this, "Reporte copiado", Toast.LENGTH_SHORT).show()
         }
-
         builder.create().show()
     }
+
+    data class ErrorCompleto(
+        val lexema: String,
+        val linea: Int,
+        val columna: Int,
+        val tipo: String,
+        val descripcion: String
+    )
 }
