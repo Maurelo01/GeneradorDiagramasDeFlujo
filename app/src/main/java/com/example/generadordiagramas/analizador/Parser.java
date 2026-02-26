@@ -31,9 +31,9 @@ public class Parser extends lr_parser {
   protected static final short _production_table[][] = 
     unpackFromStrings(new String[] {
     "\000\123\000\002\002\004\000\002\002\005\000\002\003" +
-    "\005\000\002\004\004\000\002\004\003\000\002\005\003" +
-    "\000\002\005\003\000\002\005\003\000\002\006\004\000" +
-    "\002\006\003\000\002\007\003\000\002\007\003\000\002" +
+    "\005\000\002\004\004\000\002\004\003\000\002\006\003" +
+    "\000\002\006\003\000\002\006\003\000\002\005\004\000" +
+    "\002\005\003\000\002\007\003\000\002\007\003\000\002" +
     "\007\003\000\002\007\003\000\002\010\006\000\002\010" +
     "\004\000\002\011\005\000\002\012\004\000\002\012\004" +
     "\000\002\013\004\000\002\027\003\000\002\027\004\000" +
@@ -454,10 +454,10 @@ public class Parser extends lr_parser {
   protected static final short[][] _reduce_table = 
     unpackFromStrings(new String[] {
     "\000\266\000\006\002\003\003\004\001\001\000\002\001" +
-    "\001\000\002\001\001\000\024\004\012\005\013\007\007" +
+    "\001\000\002\001\001\000\024\004\012\006\013\007\007" +
     "\010\020\011\014\012\024\013\021\014\006\015\010\001" +
     "\001\000\002\001\001\000\002\001\001\000\002\001\001" +
-    "\000\004\016\126\001\001\000\022\005\125\007\007\010" +
+    "\000\004\016\126\001\001\000\022\006\125\007\007\010" +
     "\020\011\014\012\024\013\021\014\006\015\010\001\001" +
     "\000\002\001\001\000\002\001\001\000\002\001\001\000" +
     "\002\001\001\000\002\001\001\000\002\001\001\000\002" +
@@ -477,13 +477,13 @@ public class Parser extends lr_parser {
     "\002\001\001\000\002\001\001\000\002\001\001\000\006" +
     "\016\031\017\072\001\001\000\002\001\001\000\006\016" +
     "\031\017\071\001\001\000\002\001\001\000\002\001\001" +
-    "\000\002\001\001\000\016\006\076\007\075\010\020\011" +
+    "\000\002\001\001\000\016\005\076\007\075\010\020\011" +
     "\014\012\024\013\021\001\001\000\002\001\001\000\016" +
     "\007\077\010\020\011\014\012\024\013\021\027\101\001" +
     "\001\000\002\001\001\000\002\001\001\000\002\001\001" +
     "\000\002\001\001\000\002\001\001\000\002\001\001\000" +
     "\006\016\031\017\106\001\001\000\002\001\001\000\002" +
-    "\001\001\000\016\006\111\007\075\010\020\011\014\012" +
+    "\001\001\000\016\005\111\007\075\010\020\011\014\012" +
     "\024\013\021\001\001\000\016\007\077\010\020\011\014" +
     "\012\024\013\021\030\112\001\001\000\002\001\001\000" +
     "\002\001\001\000\002\001\001\000\002\001\001\000\004" +
@@ -631,7 +631,7 @@ class CUP$Parser$actions {
               Object RESULT =null;
 		int start_valleft = ((Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-1)).left;
 		int start_valright = ((Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-1)).right;
-		Object start_val = (Object)((Symbol) CUP$Parser$stack.elementAt(CUP$Parser$top-1)).value;
+		ArrayList<FiguraDiagrama> start_val = (ArrayList<FiguraDiagrama>)((Symbol) CUP$Parser$stack.elementAt(CUP$Parser$top-1)).value;
 		RESULT = start_val;
               CUP$Parser$result = parser.getSymbolFactory().newSymbol("$START",0, ((Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-1)), ((Symbol)CUP$Parser$stack.peek()), RESULT);
             }
@@ -642,8 +642,11 @@ class CUP$Parser$actions {
           /*. . . . . . . . . . . . . . . . . . . .*/
           case 1: // programa ::= seccion_algoritmo SEPARADOR seccion_configuracion 
             {
-              Object RESULT =null;
-
+              ArrayList<FiguraDiagrama> RESULT =null;
+		int listaleft = ((Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-2)).left;
+		int listaright = ((Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-2)).right;
+		ArrayList<FiguraDiagrama> lista = (ArrayList<FiguraDiagrama>)((Symbol) CUP$Parser$stack.elementAt(CUP$Parser$top-2)).value;
+		 RESULT = lista; 
               CUP$Parser$result = parser.getSymbolFactory().newSymbol("programa",0, ((Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-2)), ((Symbol)CUP$Parser$stack.peek()), RESULT);
             }
           return CUP$Parser$result;
@@ -651,8 +654,17 @@ class CUP$Parser$actions {
           /*. . . . . . . . . . . . . . . . . . . .*/
           case 2: // seccion_algoritmo ::= INICIO instrucciones FIN 
             {
-              Object RESULT =null;
-
+              ArrayList<FiguraDiagrama> RESULT =null;
+		int listaleft = ((Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-1)).left;
+		int listaright = ((Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-1)).right;
+		ArrayList<FiguraDiagrama> lista = (ArrayList<FiguraDiagrama>)((Symbol) CUP$Parser$stack.elementAt(CUP$Parser$top-1)).value;
+		
+        ArrayList<FiguraDiagrama> diagrama = new ArrayList<>();
+        diagrama.add(new FiguraDiagrama("INICIO", "INICIO"));
+        diagrama.addAll(lista);
+        diagrama.add(new FiguraDiagrama("FIN", "FIN"));
+        RESULT = diagrama;
+    
               CUP$Parser$result = parser.getSymbolFactory().newSymbol("seccion_algoritmo",1, ((Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-2)), ((Symbol)CUP$Parser$stack.peek()), RESULT);
             }
           return CUP$Parser$result;
@@ -660,8 +672,17 @@ class CUP$Parser$actions {
           /*. . . . . . . . . . . . . . . . . . . .*/
           case 3: // instrucciones ::= instrucciones instruccion 
             {
-              Object RESULT =null;
-
+              ArrayList<FiguraDiagrama> RESULT =null;
+		int listaleft = ((Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-1)).left;
+		int listaright = ((Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-1)).right;
+		ArrayList<FiguraDiagrama> lista = (ArrayList<FiguraDiagrama>)((Symbol) CUP$Parser$stack.elementAt(CUP$Parser$top-1)).value;
+		int instleft = ((Symbol)CUP$Parser$stack.peek()).left;
+		int instright = ((Symbol)CUP$Parser$stack.peek()).right;
+		FiguraDiagrama inst = (FiguraDiagrama)((Symbol) CUP$Parser$stack.peek()).value;
+		
+        lista.add(inst);
+        RESULT = lista;
+    
               CUP$Parser$result = parser.getSymbolFactory().newSymbol("instrucciones",2, ((Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-1)), ((Symbol)CUP$Parser$stack.peek()), RESULT);
             }
           return CUP$Parser$result;
@@ -669,8 +690,15 @@ class CUP$Parser$actions {
           /*. . . . . . . . . . . . . . . . . . . .*/
           case 4: // instrucciones ::= instruccion 
             {
-              Object RESULT =null;
-
+              ArrayList<FiguraDiagrama> RESULT =null;
+		int instleft = ((Symbol)CUP$Parser$stack.peek()).left;
+		int instright = ((Symbol)CUP$Parser$stack.peek()).right;
+		FiguraDiagrama inst = (FiguraDiagrama)((Symbol) CUP$Parser$stack.peek()).value;
+		
+        ArrayList<FiguraDiagrama> lista = new ArrayList<>();
+        lista.add(inst);
+        RESULT = lista;
+    
               CUP$Parser$result = parser.getSymbolFactory().newSymbol("instrucciones",2, ((Symbol)CUP$Parser$stack.peek()), ((Symbol)CUP$Parser$stack.peek()), RESULT);
             }
           return CUP$Parser$result;
@@ -678,53 +706,81 @@ class CUP$Parser$actions {
           /*. . . . . . . . . . . . . . . . . . . .*/
           case 5: // instruccion ::= instruccion_simple 
             {
-              Object RESULT =null;
-
-              CUP$Parser$result = parser.getSymbolFactory().newSymbol("instruccion",3, ((Symbol)CUP$Parser$stack.peek()), ((Symbol)CUP$Parser$stack.peek()), RESULT);
+              FiguraDiagrama RESULT =null;
+		int ileft = ((Symbol)CUP$Parser$stack.peek()).left;
+		int iright = ((Symbol)CUP$Parser$stack.peek()).right;
+		FiguraDiagrama i = (FiguraDiagrama)((Symbol) CUP$Parser$stack.peek()).value;
+		 RESULT = i; 
+              CUP$Parser$result = parser.getSymbolFactory().newSymbol("instruccion",4, ((Symbol)CUP$Parser$stack.peek()), ((Symbol)CUP$Parser$stack.peek()), RESULT);
             }
           return CUP$Parser$result;
 
           /*. . . . . . . . . . . . . . . . . . . .*/
           case 6: // instruccion ::= condicional 
             {
-              Object RESULT =null;
-
-              CUP$Parser$result = parser.getSymbolFactory().newSymbol("instruccion",3, ((Symbol)CUP$Parser$stack.peek()), ((Symbol)CUP$Parser$stack.peek()), RESULT);
+              FiguraDiagrama RESULT =null;
+		int cleft = ((Symbol)CUP$Parser$stack.peek()).left;
+		int cright = ((Symbol)CUP$Parser$stack.peek()).right;
+		FiguraDiagrama c = (FiguraDiagrama)((Symbol) CUP$Parser$stack.peek()).value;
+		 RESULT = c; 
+              CUP$Parser$result = parser.getSymbolFactory().newSymbol("instruccion",4, ((Symbol)CUP$Parser$stack.peek()), ((Symbol)CUP$Parser$stack.peek()), RESULT);
             }
           return CUP$Parser$result;
 
           /*. . . . . . . . . . . . . . . . . . . .*/
           case 7: // instruccion ::= ciclo 
             {
-              Object RESULT =null;
-
-              CUP$Parser$result = parser.getSymbolFactory().newSymbol("instruccion",3, ((Symbol)CUP$Parser$stack.peek()), ((Symbol)CUP$Parser$stack.peek()), RESULT);
+              FiguraDiagrama RESULT =null;
+		int cleft = ((Symbol)CUP$Parser$stack.peek()).left;
+		int cright = ((Symbol)CUP$Parser$stack.peek()).right;
+		FiguraDiagrama c = (FiguraDiagrama)((Symbol) CUP$Parser$stack.peek()).value;
+		 RESULT = c; 
+              CUP$Parser$result = parser.getSymbolFactory().newSymbol("instruccion",4, ((Symbol)CUP$Parser$stack.peek()), ((Symbol)CUP$Parser$stack.peek()), RESULT);
             }
           return CUP$Parser$result;
 
           /*. . . . . . . . . . . . . . . . . . . .*/
           case 8: // bloque_simple ::= bloque_simple instruccion_simple 
             {
-              Object RESULT =null;
-
-              CUP$Parser$result = parser.getSymbolFactory().newSymbol("bloque_simple",4, ((Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-1)), ((Symbol)CUP$Parser$stack.peek()), RESULT);
+              ArrayList<FiguraDiagrama> RESULT =null;
+		int listaleft = ((Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-1)).left;
+		int listaright = ((Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-1)).right;
+		ArrayList<FiguraDiagrama> lista = (ArrayList<FiguraDiagrama>)((Symbol) CUP$Parser$stack.elementAt(CUP$Parser$top-1)).value;
+		int instleft = ((Symbol)CUP$Parser$stack.peek()).left;
+		int instright = ((Symbol)CUP$Parser$stack.peek()).right;
+		FiguraDiagrama inst = (FiguraDiagrama)((Symbol) CUP$Parser$stack.peek()).value;
+		
+        lista.add(inst);
+        RESULT = lista;
+    
+              CUP$Parser$result = parser.getSymbolFactory().newSymbol("bloque_simple",3, ((Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-1)), ((Symbol)CUP$Parser$stack.peek()), RESULT);
             }
           return CUP$Parser$result;
 
           /*. . . . . . . . . . . . . . . . . . . .*/
           case 9: // bloque_simple ::= instruccion_simple 
             {
-              Object RESULT =null;
-
-              CUP$Parser$result = parser.getSymbolFactory().newSymbol("bloque_simple",4, ((Symbol)CUP$Parser$stack.peek()), ((Symbol)CUP$Parser$stack.peek()), RESULT);
+              ArrayList<FiguraDiagrama> RESULT =null;
+		int instleft = ((Symbol)CUP$Parser$stack.peek()).left;
+		int instright = ((Symbol)CUP$Parser$stack.peek()).right;
+		FiguraDiagrama inst = (FiguraDiagrama)((Symbol) CUP$Parser$stack.peek()).value;
+		
+        ArrayList<FiguraDiagrama> lista = new ArrayList<>();
+        lista.add(inst);
+        RESULT = lista;
+    
+              CUP$Parser$result = parser.getSymbolFactory().newSymbol("bloque_simple",3, ((Symbol)CUP$Parser$stack.peek()), ((Symbol)CUP$Parser$stack.peek()), RESULT);
             }
           return CUP$Parser$result;
 
           /*. . . . . . . . . . . . . . . . . . . .*/
           case 10: // instruccion_simple ::= declaracion 
             {
-              Object RESULT =null;
-
+              FiguraDiagrama RESULT =null;
+		int dleft = ((Symbol)CUP$Parser$stack.peek()).left;
+		int dright = ((Symbol)CUP$Parser$stack.peek()).right;
+		FiguraDiagrama d = (FiguraDiagrama)((Symbol) CUP$Parser$stack.peek()).value;
+		 RESULT = d; 
               CUP$Parser$result = parser.getSymbolFactory().newSymbol("instruccion_simple",5, ((Symbol)CUP$Parser$stack.peek()), ((Symbol)CUP$Parser$stack.peek()), RESULT);
             }
           return CUP$Parser$result;
@@ -732,8 +788,11 @@ class CUP$Parser$actions {
           /*. . . . . . . . . . . . . . . . . . . .*/
           case 11: // instruccion_simple ::= asignacion 
             {
-              Object RESULT =null;
-
+              FiguraDiagrama RESULT =null;
+		int aleft = ((Symbol)CUP$Parser$stack.peek()).left;
+		int aright = ((Symbol)CUP$Parser$stack.peek()).right;
+		FiguraDiagrama a = (FiguraDiagrama)((Symbol) CUP$Parser$stack.peek()).value;
+		 RESULT = a; 
               CUP$Parser$result = parser.getSymbolFactory().newSymbol("instruccion_simple",5, ((Symbol)CUP$Parser$stack.peek()), ((Symbol)CUP$Parser$stack.peek()), RESULT);
             }
           return CUP$Parser$result;
@@ -741,8 +800,11 @@ class CUP$Parser$actions {
           /*. . . . . . . . . . . . . . . . . . . .*/
           case 12: // instruccion_simple ::= mostrar 
             {
-              Object RESULT =null;
-
+              FiguraDiagrama RESULT =null;
+		int mleft = ((Symbol)CUP$Parser$stack.peek()).left;
+		int mright = ((Symbol)CUP$Parser$stack.peek()).right;
+		FiguraDiagrama m = (FiguraDiagrama)((Symbol) CUP$Parser$stack.peek()).value;
+		 RESULT = m; 
               CUP$Parser$result = parser.getSymbolFactory().newSymbol("instruccion_simple",5, ((Symbol)CUP$Parser$stack.peek()), ((Symbol)CUP$Parser$stack.peek()), RESULT);
             }
           return CUP$Parser$result;
@@ -750,8 +812,11 @@ class CUP$Parser$actions {
           /*. . . . . . . . . . . . . . . . . . . .*/
           case 13: // instruccion_simple ::= leer 
             {
-              Object RESULT =null;
-
+              FiguraDiagrama RESULT =null;
+		int lleft = ((Symbol)CUP$Parser$stack.peek()).left;
+		int lright = ((Symbol)CUP$Parser$stack.peek()).right;
+		FiguraDiagrama l = (FiguraDiagrama)((Symbol) CUP$Parser$stack.peek()).value;
+		 RESULT = l; 
               CUP$Parser$result = parser.getSymbolFactory().newSymbol("instruccion_simple",5, ((Symbol)CUP$Parser$stack.peek()), ((Symbol)CUP$Parser$stack.peek()), RESULT);
             }
           return CUP$Parser$result;
@@ -759,8 +824,14 @@ class CUP$Parser$actions {
           /*. . . . . . . . . . . . . . . . . . . .*/
           case 14: // declaracion ::= VAR ID IGUAL_ASIG expr_aritmetica 
             {
-              Object RESULT =null;
-
+              FiguraDiagrama RESULT =null;
+		int idleft = ((Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-2)).left;
+		int idright = ((Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-2)).right;
+		String id = (String)((Symbol) CUP$Parser$stack.elementAt(CUP$Parser$top-2)).value;
+		int eleft = ((Symbol)CUP$Parser$stack.peek()).left;
+		int eright = ((Symbol)CUP$Parser$stack.peek()).right;
+		String e = (String)((Symbol) CUP$Parser$stack.peek()).value;
+		 RESULT = new FiguraDiagrama("PROCESO", "VAR " + id + " = " + e); 
               CUP$Parser$result = parser.getSymbolFactory().newSymbol("declaracion",6, ((Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-3)), ((Symbol)CUP$Parser$stack.peek()), RESULT);
             }
           return CUP$Parser$result;
@@ -768,8 +839,11 @@ class CUP$Parser$actions {
           /*. . . . . . . . . . . . . . . . . . . .*/
           case 15: // declaracion ::= VAR ID 
             {
-              Object RESULT =null;
-
+              FiguraDiagrama RESULT =null;
+		int idleft = ((Symbol)CUP$Parser$stack.peek()).left;
+		int idright = ((Symbol)CUP$Parser$stack.peek()).right;
+		String id = (String)((Symbol) CUP$Parser$stack.peek()).value;
+		 RESULT = new FiguraDiagrama("PROCESO", "VAR " + id); 
               CUP$Parser$result = parser.getSymbolFactory().newSymbol("declaracion",6, ((Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-1)), ((Symbol)CUP$Parser$stack.peek()), RESULT);
             }
           return CUP$Parser$result;
@@ -777,8 +851,14 @@ class CUP$Parser$actions {
           /*. . . . . . . . . . . . . . . . . . . .*/
           case 16: // asignacion ::= ID IGUAL_ASIG expr_aritmetica 
             {
-              Object RESULT =null;
-
+              FiguraDiagrama RESULT =null;
+		int idleft = ((Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-2)).left;
+		int idright = ((Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-2)).right;
+		String id = (String)((Symbol) CUP$Parser$stack.elementAt(CUP$Parser$top-2)).value;
+		int eleft = ((Symbol)CUP$Parser$stack.peek()).left;
+		int eright = ((Symbol)CUP$Parser$stack.peek()).right;
+		String e = (String)((Symbol) CUP$Parser$stack.peek()).value;
+		 RESULT = new FiguraDiagrama("PROCESO", id + " = " + e); 
               CUP$Parser$result = parser.getSymbolFactory().newSymbol("asignacion",7, ((Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-2)), ((Symbol)CUP$Parser$stack.peek()), RESULT);
             }
           return CUP$Parser$result;
@@ -786,8 +866,11 @@ class CUP$Parser$actions {
           /*. . . . . . . . . . . . . . . . . . . .*/
           case 17: // mostrar ::= MOSTRAR CADENA 
             {
-              Object RESULT =null;
-
+              FiguraDiagrama RESULT =null;
+		int cleft = ((Symbol)CUP$Parser$stack.peek()).left;
+		int cright = ((Symbol)CUP$Parser$stack.peek()).right;
+		String c = (String)((Symbol) CUP$Parser$stack.peek()).value;
+		 RESULT = new FiguraDiagrama("IO", "MOSTRAR " + c); 
               CUP$Parser$result = parser.getSymbolFactory().newSymbol("mostrar",8, ((Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-1)), ((Symbol)CUP$Parser$stack.peek()), RESULT);
             }
           return CUP$Parser$result;
@@ -795,8 +878,11 @@ class CUP$Parser$actions {
           /*. . . . . . . . . . . . . . . . . . . .*/
           case 18: // mostrar ::= MOSTRAR expr_aritmetica 
             {
-              Object RESULT =null;
-
+              FiguraDiagrama RESULT =null;
+		int eleft = ((Symbol)CUP$Parser$stack.peek()).left;
+		int eright = ((Symbol)CUP$Parser$stack.peek()).right;
+		String e = (String)((Symbol) CUP$Parser$stack.peek()).value;
+		 RESULT = new FiguraDiagrama("IO", "MOSTRAR " + e); 
               CUP$Parser$result = parser.getSymbolFactory().newSymbol("mostrar",8, ((Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-1)), ((Symbol)CUP$Parser$stack.peek()), RESULT);
             }
           return CUP$Parser$result;
@@ -804,8 +890,11 @@ class CUP$Parser$actions {
           /*. . . . . . . . . . . . . . . . . . . .*/
           case 19: // leer ::= LEER ID 
             {
-              Object RESULT =null;
-
+              FiguraDiagrama RESULT =null;
+		int idleft = ((Symbol)CUP$Parser$stack.peek()).left;
+		int idright = ((Symbol)CUP$Parser$stack.peek()).right;
+		String id = (String)((Symbol) CUP$Parser$stack.peek()).value;
+		 RESULT = new FiguraDiagrama("IO", "LEER " + id); 
               CUP$Parser$result = parser.getSymbolFactory().newSymbol("leer",9, ((Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-1)), ((Symbol)CUP$Parser$stack.peek()), RESULT);
             }
           return CUP$Parser$result;
@@ -849,8 +938,18 @@ class CUP$Parser$actions {
           /*. . . . . . . . . . . . . . . . . . . .*/
           case 24: // condicional ::= SI PAR_IZQ condicion PAR_DER ENTONCES bloque_simple cierre_si 
             {
-              Object RESULT =null;
-
+              FiguraDiagrama RESULT =null;
+		int condleft = ((Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-4)).left;
+		int condright = ((Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-4)).right;
+		String cond = (String)((Symbol) CUP$Parser$stack.elementAt(CUP$Parser$top-4)).value;
+		int bloqueleft = ((Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-1)).left;
+		int bloqueright = ((Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-1)).right;
+		ArrayList<FiguraDiagrama> bloque = (ArrayList<FiguraDiagrama>)((Symbol) CUP$Parser$stack.elementAt(CUP$Parser$top-1)).value;
+		
+        FiguraDiagrama nodoSi = new FiguraDiagrama("CONDICION", cond);
+        nodoSi.bloqueInterno = bloque;
+        RESULT = nodoSi;
+    
               CUP$Parser$result = parser.getSymbolFactory().newSymbol("condicional",10, ((Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-6)), ((Symbol)CUP$Parser$stack.peek()), RESULT);
             }
           return CUP$Parser$result;
@@ -858,8 +957,18 @@ class CUP$Parser$actions {
           /*. . . . . . . . . . . . . . . . . . . .*/
           case 25: // ciclo ::= MIENTRAS PAR_IZQ condicion PAR_DER HACER bloque_simple cierre_mientras 
             {
-              Object RESULT =null;
-
+              FiguraDiagrama RESULT =null;
+		int condleft = ((Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-4)).left;
+		int condright = ((Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-4)).right;
+		String cond = (String)((Symbol) CUP$Parser$stack.elementAt(CUP$Parser$top-4)).value;
+		int bloqueleft = ((Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-1)).left;
+		int bloqueright = ((Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-1)).right;
+		ArrayList<FiguraDiagrama> bloque = (ArrayList<FiguraDiagrama>)((Symbol) CUP$Parser$stack.elementAt(CUP$Parser$top-1)).value;
+		
+        FiguraDiagrama nodoMientras = new FiguraDiagrama("CONDICION", "MIENTRAS " + cond);
+        nodoMientras.bloqueInterno = bloque;
+        RESULT = nodoMientras;
+    
               CUP$Parser$result = parser.getSymbolFactory().newSymbol("ciclo",11, ((Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-6)), ((Symbol)CUP$Parser$stack.peek()), RESULT);
             }
           return CUP$Parser$result;
@@ -867,8 +976,14 @@ class CUP$Parser$actions {
           /*. . . . . . . . . . . . . . . . . . . .*/
           case 26: // expr_aritmetica ::= expr_aritmetica MAS expr_aritmetica 
             {
-              Object RESULT =null;
-
+              String RESULT =null;
+		int e1left = ((Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-2)).left;
+		int e1right = ((Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-2)).right;
+		String e1 = (String)((Symbol) CUP$Parser$stack.elementAt(CUP$Parser$top-2)).value;
+		int e2left = ((Symbol)CUP$Parser$stack.peek()).left;
+		int e2right = ((Symbol)CUP$Parser$stack.peek()).right;
+		String e2 = (String)((Symbol) CUP$Parser$stack.peek()).value;
+		 RESULT = e1 + " + " + e2; 
               CUP$Parser$result = parser.getSymbolFactory().newSymbol("expr_aritmetica",12, ((Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-2)), ((Symbol)CUP$Parser$stack.peek()), RESULT);
             }
           return CUP$Parser$result;
@@ -876,8 +991,14 @@ class CUP$Parser$actions {
           /*. . . . . . . . . . . . . . . . . . . .*/
           case 27: // expr_aritmetica ::= expr_aritmetica MENOS expr_aritmetica 
             {
-              Object RESULT =null;
-
+              String RESULT =null;
+		int e1left = ((Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-2)).left;
+		int e1right = ((Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-2)).right;
+		String e1 = (String)((Symbol) CUP$Parser$stack.elementAt(CUP$Parser$top-2)).value;
+		int e2left = ((Symbol)CUP$Parser$stack.peek()).left;
+		int e2right = ((Symbol)CUP$Parser$stack.peek()).right;
+		String e2 = (String)((Symbol) CUP$Parser$stack.peek()).value;
+		 RESULT = e1 + " - " + e2; 
               CUP$Parser$result = parser.getSymbolFactory().newSymbol("expr_aritmetica",12, ((Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-2)), ((Symbol)CUP$Parser$stack.peek()), RESULT);
             }
           return CUP$Parser$result;
@@ -885,8 +1006,14 @@ class CUP$Parser$actions {
           /*. . . . . . . . . . . . . . . . . . . .*/
           case 28: // expr_aritmetica ::= expr_aritmetica POR expr_aritmetica 
             {
-              Object RESULT =null;
-
+              String RESULT =null;
+		int e1left = ((Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-2)).left;
+		int e1right = ((Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-2)).right;
+		String e1 = (String)((Symbol) CUP$Parser$stack.elementAt(CUP$Parser$top-2)).value;
+		int e2left = ((Symbol)CUP$Parser$stack.peek()).left;
+		int e2right = ((Symbol)CUP$Parser$stack.peek()).right;
+		String e2 = (String)((Symbol) CUP$Parser$stack.peek()).value;
+		 RESULT = e1 + " * " + e2; 
               CUP$Parser$result = parser.getSymbolFactory().newSymbol("expr_aritmetica",12, ((Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-2)), ((Symbol)CUP$Parser$stack.peek()), RESULT);
             }
           return CUP$Parser$result;
@@ -894,8 +1021,14 @@ class CUP$Parser$actions {
           /*. . . . . . . . . . . . . . . . . . . .*/
           case 29: // expr_aritmetica ::= expr_aritmetica DIV expr_aritmetica 
             {
-              Object RESULT =null;
-
+              String RESULT =null;
+		int e1left = ((Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-2)).left;
+		int e1right = ((Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-2)).right;
+		String e1 = (String)((Symbol) CUP$Parser$stack.elementAt(CUP$Parser$top-2)).value;
+		int e2left = ((Symbol)CUP$Parser$stack.peek()).left;
+		int e2right = ((Symbol)CUP$Parser$stack.peek()).right;
+		String e2 = (String)((Symbol) CUP$Parser$stack.peek()).value;
+		 RESULT = e1 + " / " + e2; 
               CUP$Parser$result = parser.getSymbolFactory().newSymbol("expr_aritmetica",12, ((Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-2)), ((Symbol)CUP$Parser$stack.peek()), RESULT);
             }
           return CUP$Parser$result;
@@ -903,8 +1036,11 @@ class CUP$Parser$actions {
           /*. . . . . . . . . . . . . . . . . . . .*/
           case 30: // expr_aritmetica ::= PAR_IZQ expr_aritmetica PAR_DER 
             {
-              Object RESULT =null;
-
+              String RESULT =null;
+		int eleft = ((Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-1)).left;
+		int eright = ((Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-1)).right;
+		String e = (String)((Symbol) CUP$Parser$stack.elementAt(CUP$Parser$top-1)).value;
+		 RESULT = "(" + e + ")"; 
               CUP$Parser$result = parser.getSymbolFactory().newSymbol("expr_aritmetica",12, ((Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-2)), ((Symbol)CUP$Parser$stack.peek()), RESULT);
             }
           return CUP$Parser$result;
@@ -912,8 +1048,11 @@ class CUP$Parser$actions {
           /*. . . . . . . . . . . . . . . . . . . .*/
           case 31: // expr_aritmetica ::= ENTERO 
             {
-              Object RESULT =null;
-
+              String RESULT =null;
+		int eleft = ((Symbol)CUP$Parser$stack.peek()).left;
+		int eright = ((Symbol)CUP$Parser$stack.peek()).right;
+		String e = (String)((Symbol) CUP$Parser$stack.peek()).value;
+		 RESULT = e; 
               CUP$Parser$result = parser.getSymbolFactory().newSymbol("expr_aritmetica",12, ((Symbol)CUP$Parser$stack.peek()), ((Symbol)CUP$Parser$stack.peek()), RESULT);
             }
           return CUP$Parser$result;
@@ -921,8 +1060,11 @@ class CUP$Parser$actions {
           /*. . . . . . . . . . . . . . . . . . . .*/
           case 32: // expr_aritmetica ::= DECIMAL 
             {
-              Object RESULT =null;
-
+              String RESULT =null;
+		int dleft = ((Symbol)CUP$Parser$stack.peek()).left;
+		int dright = ((Symbol)CUP$Parser$stack.peek()).right;
+		String d = (String)((Symbol) CUP$Parser$stack.peek()).value;
+		 RESULT = d; 
               CUP$Parser$result = parser.getSymbolFactory().newSymbol("expr_aritmetica",12, ((Symbol)CUP$Parser$stack.peek()), ((Symbol)CUP$Parser$stack.peek()), RESULT);
             }
           return CUP$Parser$result;
@@ -930,8 +1072,11 @@ class CUP$Parser$actions {
           /*. . . . . . . . . . . . . . . . . . . .*/
           case 33: // expr_aritmetica ::= ID 
             {
-              Object RESULT =null;
-
+              String RESULT =null;
+		int idleft = ((Symbol)CUP$Parser$stack.peek()).left;
+		int idright = ((Symbol)CUP$Parser$stack.peek()).right;
+		String id = (String)((Symbol) CUP$Parser$stack.peek()).value;
+		 RESULT = id; 
               CUP$Parser$result = parser.getSymbolFactory().newSymbol("expr_aritmetica",12, ((Symbol)CUP$Parser$stack.peek()), ((Symbol)CUP$Parser$stack.peek()), RESULT);
             }
           return CUP$Parser$result;
@@ -939,8 +1084,14 @@ class CUP$Parser$actions {
           /*. . . . . . . . . . . . . . . . . . . .*/
           case 34: // condicion ::= expr_aritmetica IGUALDAD expr_aritmetica 
             {
-              Object RESULT =null;
-
+              String RESULT =null;
+		int e1left = ((Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-2)).left;
+		int e1right = ((Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-2)).right;
+		String e1 = (String)((Symbol) CUP$Parser$stack.elementAt(CUP$Parser$top-2)).value;
+		int e2left = ((Symbol)CUP$Parser$stack.peek()).left;
+		int e2right = ((Symbol)CUP$Parser$stack.peek()).right;
+		String e2 = (String)((Symbol) CUP$Parser$stack.peek()).value;
+		 RESULT = e1 + " == " + e2; 
               CUP$Parser$result = parser.getSymbolFactory().newSymbol("condicion",13, ((Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-2)), ((Symbol)CUP$Parser$stack.peek()), RESULT);
             }
           return CUP$Parser$result;
@@ -948,8 +1099,14 @@ class CUP$Parser$actions {
           /*. . . . . . . . . . . . . . . . . . . .*/
           case 35: // condicion ::= expr_aritmetica DIFERENTE expr_aritmetica 
             {
-              Object RESULT =null;
-
+              String RESULT =null;
+		int e1left = ((Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-2)).left;
+		int e1right = ((Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-2)).right;
+		String e1 = (String)((Symbol) CUP$Parser$stack.elementAt(CUP$Parser$top-2)).value;
+		int e2left = ((Symbol)CUP$Parser$stack.peek()).left;
+		int e2right = ((Symbol)CUP$Parser$stack.peek()).right;
+		String e2 = (String)((Symbol) CUP$Parser$stack.peek()).value;
+		 RESULT = e1 + " != " + e2; 
               CUP$Parser$result = parser.getSymbolFactory().newSymbol("condicion",13, ((Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-2)), ((Symbol)CUP$Parser$stack.peek()), RESULT);
             }
           return CUP$Parser$result;
@@ -957,8 +1114,14 @@ class CUP$Parser$actions {
           /*. . . . . . . . . . . . . . . . . . . .*/
           case 36: // condicion ::= expr_aritmetica MAYOR expr_aritmetica 
             {
-              Object RESULT =null;
-
+              String RESULT =null;
+		int e1left = ((Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-2)).left;
+		int e1right = ((Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-2)).right;
+		String e1 = (String)((Symbol) CUP$Parser$stack.elementAt(CUP$Parser$top-2)).value;
+		int e2left = ((Symbol)CUP$Parser$stack.peek()).left;
+		int e2right = ((Symbol)CUP$Parser$stack.peek()).right;
+		String e2 = (String)((Symbol) CUP$Parser$stack.peek()).value;
+		 RESULT = e1 + " > " + e2; 
               CUP$Parser$result = parser.getSymbolFactory().newSymbol("condicion",13, ((Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-2)), ((Symbol)CUP$Parser$stack.peek()), RESULT);
             }
           return CUP$Parser$result;
@@ -966,8 +1129,14 @@ class CUP$Parser$actions {
           /*. . . . . . . . . . . . . . . . . . . .*/
           case 37: // condicion ::= expr_aritmetica MENOR expr_aritmetica 
             {
-              Object RESULT =null;
-
+              String RESULT =null;
+		int e1left = ((Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-2)).left;
+		int e1right = ((Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-2)).right;
+		String e1 = (String)((Symbol) CUP$Parser$stack.elementAt(CUP$Parser$top-2)).value;
+		int e2left = ((Symbol)CUP$Parser$stack.peek()).left;
+		int e2right = ((Symbol)CUP$Parser$stack.peek()).right;
+		String e2 = (String)((Symbol) CUP$Parser$stack.peek()).value;
+		 RESULT = e1 + " < " + e2; 
               CUP$Parser$result = parser.getSymbolFactory().newSymbol("condicion",13, ((Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-2)), ((Symbol)CUP$Parser$stack.peek()), RESULT);
             }
           return CUP$Parser$result;
@@ -975,8 +1144,14 @@ class CUP$Parser$actions {
           /*. . . . . . . . . . . . . . . . . . . .*/
           case 38: // condicion ::= expr_aritmetica MAYOR_IGUAL expr_aritmetica 
             {
-              Object RESULT =null;
-
+              String RESULT =null;
+		int e1left = ((Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-2)).left;
+		int e1right = ((Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-2)).right;
+		String e1 = (String)((Symbol) CUP$Parser$stack.elementAt(CUP$Parser$top-2)).value;
+		int e2left = ((Symbol)CUP$Parser$stack.peek()).left;
+		int e2right = ((Symbol)CUP$Parser$stack.peek()).right;
+		String e2 = (String)((Symbol) CUP$Parser$stack.peek()).value;
+		 RESULT = e1 + " >= " + e2; 
               CUP$Parser$result = parser.getSymbolFactory().newSymbol("condicion",13, ((Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-2)), ((Symbol)CUP$Parser$stack.peek()), RESULT);
             }
           return CUP$Parser$result;
@@ -984,8 +1159,14 @@ class CUP$Parser$actions {
           /*. . . . . . . . . . . . . . . . . . . .*/
           case 39: // condicion ::= expr_aritmetica MENOR_IGUAL expr_aritmetica 
             {
-              Object RESULT =null;
-
+              String RESULT =null;
+		int e1left = ((Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-2)).left;
+		int e1right = ((Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-2)).right;
+		String e1 = (String)((Symbol) CUP$Parser$stack.elementAt(CUP$Parser$top-2)).value;
+		int e2left = ((Symbol)CUP$Parser$stack.peek()).left;
+		int e2right = ((Symbol)CUP$Parser$stack.peek()).right;
+		String e2 = (String)((Symbol) CUP$Parser$stack.peek()).value;
+		 RESULT = e1 + " <= " + e2; 
               CUP$Parser$result = parser.getSymbolFactory().newSymbol("condicion",13, ((Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-2)), ((Symbol)CUP$Parser$stack.peek()), RESULT);
             }
           return CUP$Parser$result;
@@ -993,8 +1174,14 @@ class CUP$Parser$actions {
           /*. . . . . . . . . . . . . . . . . . . .*/
           case 40: // condicion ::= condicion AND condicion 
             {
-              Object RESULT =null;
-
+              String RESULT =null;
+		int c1left = ((Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-2)).left;
+		int c1right = ((Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-2)).right;
+		String c1 = (String)((Symbol) CUP$Parser$stack.elementAt(CUP$Parser$top-2)).value;
+		int c2left = ((Symbol)CUP$Parser$stack.peek()).left;
+		int c2right = ((Symbol)CUP$Parser$stack.peek()).right;
+		String c2 = (String)((Symbol) CUP$Parser$stack.peek()).value;
+		 RESULT = c1 + " && " + c2; 
               CUP$Parser$result = parser.getSymbolFactory().newSymbol("condicion",13, ((Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-2)), ((Symbol)CUP$Parser$stack.peek()), RESULT);
             }
           return CUP$Parser$result;
@@ -1002,8 +1189,14 @@ class CUP$Parser$actions {
           /*. . . . . . . . . . . . . . . . . . . .*/
           case 41: // condicion ::= condicion OR condicion 
             {
-              Object RESULT =null;
-
+              String RESULT =null;
+		int c1left = ((Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-2)).left;
+		int c1right = ((Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-2)).right;
+		String c1 = (String)((Symbol) CUP$Parser$stack.elementAt(CUP$Parser$top-2)).value;
+		int c2left = ((Symbol)CUP$Parser$stack.peek()).left;
+		int c2right = ((Symbol)CUP$Parser$stack.peek()).right;
+		String c2 = (String)((Symbol) CUP$Parser$stack.peek()).value;
+		 RESULT = c1 + " || " + c2; 
               CUP$Parser$result = parser.getSymbolFactory().newSymbol("condicion",13, ((Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-2)), ((Symbol)CUP$Parser$stack.peek()), RESULT);
             }
           return CUP$Parser$result;
@@ -1011,8 +1204,11 @@ class CUP$Parser$actions {
           /*. . . . . . . . . . . . . . . . . . . .*/
           case 42: // condicion ::= NOT condicion 
             {
-              Object RESULT =null;
-
+              String RESULT =null;
+		int cleft = ((Symbol)CUP$Parser$stack.peek()).left;
+		int cright = ((Symbol)CUP$Parser$stack.peek()).right;
+		String c = (String)((Symbol) CUP$Parser$stack.peek()).value;
+		 RESULT = "!" + c; 
               CUP$Parser$result = parser.getSymbolFactory().newSymbol("condicion",13, ((Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-1)), ((Symbol)CUP$Parser$stack.peek()), RESULT);
             }
           return CUP$Parser$result;
@@ -1020,8 +1216,11 @@ class CUP$Parser$actions {
           /*. . . . . . . . . . . . . . . . . . . .*/
           case 43: // condicion ::= PAR_IZQ condicion PAR_DER 
             {
-              Object RESULT =null;
-
+              String RESULT =null;
+		int cleft = ((Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-1)).left;
+		int cright = ((Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-1)).right;
+		String c = (String)((Symbol) CUP$Parser$stack.elementAt(CUP$Parser$top-1)).value;
+		 RESULT = "(" + c + ")"; 
               CUP$Parser$result = parser.getSymbolFactory().newSymbol("condicion",13, ((Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-2)), ((Symbol)CUP$Parser$stack.peek()), RESULT);
             }
           return CUP$Parser$result;
@@ -1056,7 +1255,7 @@ class CUP$Parser$actions {
           /*. . . . . . . . . . . . . . . . . . . .*/
           case 47: // indice_opt ::= PIPE expr_aritmetica 
             {
-              Object RESULT =null;
+              String RESULT =null;
 
               CUP$Parser$result = parser.getSymbolFactory().newSymbol("indice_opt",20, ((Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-1)), ((Symbol)CUP$Parser$stack.peek()), RESULT);
             }
@@ -1065,7 +1264,7 @@ class CUP$Parser$actions {
           /*. . . . . . . . . . . . . . . . . . . .*/
           case 48: // indice_opt ::= expr_aritmetica 
             {
-              Object RESULT =null;
+              String RESULT =null;
 
               CUP$Parser$result = parser.getSymbolFactory().newSymbol("indice_opt",20, ((Symbol)CUP$Parser$stack.peek()), ((Symbol)CUP$Parser$stack.peek()), RESULT);
             }
@@ -1074,7 +1273,7 @@ class CUP$Parser$actions {
           /*. . . . . . . . . . . . . . . . . . . .*/
           case 49: // indice_opt ::= 
             {
-              Object RESULT =null;
+              String RESULT =null;
 
               CUP$Parser$result = parser.getSymbolFactory().newSymbol("indice_opt",20, ((Symbol)CUP$Parser$stack.peek()), RESULT);
             }
@@ -1083,7 +1282,7 @@ class CUP$Parser$actions {
           /*. . . . . . . . . . . . . . . . . . . .*/
           case 50: // expr_color ::= expr_aritmetica COMA expr_aritmetica COMA expr_aritmetica 
             {
-              Object RESULT =null;
+              String RESULT =null;
 
               CUP$Parser$result = parser.getSymbolFactory().newSymbol("expr_color",17, ((Symbol)CUP$Parser$stack.elementAt(CUP$Parser$top-4)), ((Symbol)CUP$Parser$stack.peek()), RESULT);
             }
@@ -1092,7 +1291,7 @@ class CUP$Parser$actions {
           /*. . . . . . . . . . . . . . . . . . . .*/
           case 51: // expr_color ::= COLOR_HEX 
             {
-              Object RESULT =null;
+              String RESULT =null;
 
               CUP$Parser$result = parser.getSymbolFactory().newSymbol("expr_color",17, ((Symbol)CUP$Parser$stack.peek()), ((Symbol)CUP$Parser$stack.peek()), RESULT);
             }
@@ -1101,7 +1300,7 @@ class CUP$Parser$actions {
           /*. . . . . . . . . . . . . . . . . . . .*/
           case 52: // figura ::= FIG_ELIPSE 
             {
-              Object RESULT =null;
+              String RESULT =null;
 
               CUP$Parser$result = parser.getSymbolFactory().newSymbol("figura",18, ((Symbol)CUP$Parser$stack.peek()), ((Symbol)CUP$Parser$stack.peek()), RESULT);
             }
@@ -1110,7 +1309,7 @@ class CUP$Parser$actions {
           /*. . . . . . . . . . . . . . . . . . . .*/
           case 53: // figura ::= FIG_CIRCULO 
             {
-              Object RESULT =null;
+              String RESULT =null;
 
               CUP$Parser$result = parser.getSymbolFactory().newSymbol("figura",18, ((Symbol)CUP$Parser$stack.peek()), ((Symbol)CUP$Parser$stack.peek()), RESULT);
             }
@@ -1119,7 +1318,7 @@ class CUP$Parser$actions {
           /*. . . . . . . . . . . . . . . . . . . .*/
           case 54: // figura ::= FIG_PARALELOGRAMO 
             {
-              Object RESULT =null;
+              String RESULT =null;
 
               CUP$Parser$result = parser.getSymbolFactory().newSymbol("figura",18, ((Symbol)CUP$Parser$stack.peek()), ((Symbol)CUP$Parser$stack.peek()), RESULT);
             }
@@ -1128,7 +1327,7 @@ class CUP$Parser$actions {
           /*. . . . . . . . . . . . . . . . . . . .*/
           case 55: // figura ::= FIG_RECTANGULO 
             {
-              Object RESULT =null;
+              String RESULT =null;
 
               CUP$Parser$result = parser.getSymbolFactory().newSymbol("figura",18, ((Symbol)CUP$Parser$stack.peek()), ((Symbol)CUP$Parser$stack.peek()), RESULT);
             }
@@ -1137,7 +1336,7 @@ class CUP$Parser$actions {
           /*. . . . . . . . . . . . . . . . . . . .*/
           case 56: // figura ::= FIG_ROMBO 
             {
-              Object RESULT =null;
+              String RESULT =null;
 
               CUP$Parser$result = parser.getSymbolFactory().newSymbol("figura",18, ((Symbol)CUP$Parser$stack.peek()), ((Symbol)CUP$Parser$stack.peek()), RESULT);
             }
@@ -1146,7 +1345,7 @@ class CUP$Parser$actions {
           /*. . . . . . . . . . . . . . . . . . . .*/
           case 57: // figura ::= FIG_REC_REDONDEADO 
             {
-              Object RESULT =null;
+              String RESULT =null;
 
               CUP$Parser$result = parser.getSymbolFactory().newSymbol("figura",18, ((Symbol)CUP$Parser$stack.peek()), ((Symbol)CUP$Parser$stack.peek()), RESULT);
             }
@@ -1155,7 +1354,7 @@ class CUP$Parser$actions {
           /*. . . . . . . . . . . . . . . . . . . .*/
           case 58: // fuente ::= FONT_ARIAL 
             {
-              Object RESULT =null;
+              String RESULT =null;
 
               CUP$Parser$result = parser.getSymbolFactory().newSymbol("fuente",19, ((Symbol)CUP$Parser$stack.peek()), ((Symbol)CUP$Parser$stack.peek()), RESULT);
             }
@@ -1164,7 +1363,7 @@ class CUP$Parser$actions {
           /*. . . . . . . . . . . . . . . . . . . .*/
           case 59: // fuente ::= FONT_TIMES 
             {
-              Object RESULT =null;
+              String RESULT =null;
 
               CUP$Parser$result = parser.getSymbolFactory().newSymbol("fuente",19, ((Symbol)CUP$Parser$stack.peek()), ((Symbol)CUP$Parser$stack.peek()), RESULT);
             }
@@ -1173,7 +1372,7 @@ class CUP$Parser$actions {
           /*. . . . . . . . . . . . . . . . . . . .*/
           case 60: // fuente ::= FONT_COMIC 
             {
-              Object RESULT =null;
+              String RESULT =null;
 
               CUP$Parser$result = parser.getSymbolFactory().newSymbol("fuente",19, ((Symbol)CUP$Parser$stack.peek()), ((Symbol)CUP$Parser$stack.peek()), RESULT);
             }
@@ -1182,7 +1381,7 @@ class CUP$Parser$actions {
           /*. . . . . . . . . . . . . . . . . . . .*/
           case 61: // fuente ::= FONT_VERDANA 
             {
-              Object RESULT =null;
+              String RESULT =null;
 
               CUP$Parser$result = parser.getSymbolFactory().newSymbol("fuente",19, ((Symbol)CUP$Parser$stack.peek()), ((Symbol)CUP$Parser$stack.peek()), RESULT);
             }

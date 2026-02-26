@@ -75,14 +75,11 @@ terminal String IGUAL_ASIG, PAR_IZQ, PAR_DER, PIPE, COMA;
 terminal String ENTERO, DECIMAL, ID, CADENA, COLOR_HEX;
 
 /***** NO TERMINALES *****/
-non terminal programa;
-non terminal seccion_algoritmo, instrucciones, instruccion;
-non terminal bloque_simple, instruccion_simple;
-non terminal declaracion, asignacion, mostrar, leer;
-non terminal condicional, ciclo;
-non terminal expr_aritmetica, condicion;
+non terminal ArrayList<FiguraDiagrama> programa, seccion_algoritmo, instrucciones, bloque_simple;
+non terminal FiguraDiagrama instruccion, instruccion_simple, declaracion, asignacion, mostrar, leer, condicional, ciclo;
+non terminal String expr_aritmetica, condicion;
 non terminal seccion_configuracion, configuraciones, configuracion;
-non terminal expr_color, figura, fuente, indice_opt;
+non terminal String expr_color, figura, fuente, indice_opt;
 non terminal cierre_si, cierre_mientras;
 
 /***** PRECEDENCIA DE OPERADORES *****/
@@ -101,180 +98,158 @@ start with programa;
 /***** PRINCIPAL ****/
 
 programa ::= 
-    seccion_algoritmo SEPARADOR seccion_configuracion
+    seccion_algoritmo:lista SEPARADOR seccion_configuracion
+    {: RESULT = lista; :}
     ;
 
 /***** SECCION DE ALGORITMO *****/
 
 seccion_algoritmo ::= 
-    INICIO instrucciones FIN
+    INICIO instrucciones:lista FIN
+    {:
+        ArrayList<FiguraDiagrama> diagrama = new ArrayList<>();
+        diagrama.add(new FiguraDiagrama("INICIO", "INICIO"));
+        diagrama.addAll(lista);
+        diagrama.add(new FiguraDiagrama("FIN", "FIN"));
+        RESULT = diagrama;
+    :}
     ;
 
 instrucciones ::= 
-    instrucciones instruccion
-    | instruccion
+    instrucciones:lista instruccion:inst
+    {:
+        lista.add(inst);
+        RESULT = lista;
+    :}
+    | instruccion:inst
+    {:
+        ArrayList<FiguraDiagrama> lista = new ArrayList<>();
+        lista.add(inst);
+        RESULT = lista;
+    :}
     ;
 
 /* Instrucción de primer nivel (puede ser ciclo o condicional) */
 instruccion ::= 
-    instruccion_simple
-    | condicional
-    | ciclo
+    instruccion_simple:i {: RESULT = i; :} | condicional:c {: RESULT = c; :} | ciclo:c {: RESULT = c; :}
     ;
 
 /* Bloque interno para evitar anidamientos. Solo acepta instrucciones simples */
 bloque_simple ::= 
-    bloque_simple instruccion_simple
-    | instruccion_simple
+    bloque_simple:lista instruccion_simple:inst
+    {:
+        lista.add(inst);
+        RESULT = lista;
+    :}
+    | instruccion_simple:inst
+    {:
+        ArrayList<FiguraDiagrama> lista = new ArrayList<>();
+        lista.add(inst);
+        RESULT = lista;
+    :}
     ;
-
-instruccion_simple ::= 
-    declaracion
-    | asignacion
-    | mostrar
-    | leer
-    ;
+    instruccion_simple ::=
+        declaracion:d {: RESULT = d; :} | asignacion:a {: RESULT = a; :} | mostrar:m {: RESULT = m; :} | leer:l {: RESULT = l; :}
+        ;
 
 /***** INSTRUCCIONES SIMPLES *****/
 
 declaracion ::= 
-    VAR ID IGUAL_ASIG expr_aritmetica
-    | VAR ID
+    VAR ID:id IGUAL_ASIG expr_aritmetica:e {: RESULT = new FiguraDiagrama("PROCESO", "VAR " + id + " = " + e); :}
+    | VAR ID:id {: RESULT = new FiguraDiagrama("PROCESO", "VAR " + id); :}
     ;
 
-asignacion ::= 
-    ID IGUAL_ASIG expr_aritmetica
+asignacion ::=
+    ID:id IGUAL_ASIG expr_aritmetica:e {: RESULT = new FiguraDiagrama("PROCESO", id + " = " + e); :}
     ;
 
-mostrar ::= 
-    MOSTRAR CADENA
-    | MOSTRAR expr_aritmetica
+mostrar ::=
+    MOSTRAR CADENA:c {: RESULT = new FiguraDiagrama("IO", "MOSTRAR " + c); :}
+    | MOSTRAR expr_aritmetica:e {: RESULT = new FiguraDiagrama("IO", "MOSTRAR " + e); :}
     ;
 
-leer ::= 
-    LEER ID
+leer ::=
+    LEER ID:id {: RESULT = new FiguraDiagrama("IO", "LEER " + id); :}
     ;
 
 /***** ESTRUCTURAS DE CONTROL *****/
 
-/* Trampas de espaciado resueltas */
-cierre_si ::= 
-    FINSI 
-    | FIN SI
+cierre_si ::= FINSI | FIN SI ;
+cierre_mientras ::= FINMIENTRAS | FIN MIENTRAS ;
+
+condicional ::=
+    SI PAR_IZQ condicion:cond PAR_DER ENTONCES bloque_simple:bloque cierre_si
+    {:
+        FiguraDiagrama nodoSi = new FiguraDiagrama("CONDICION", cond);
+        nodoSi.bloqueInterno = bloque;
+        RESULT = nodoSi;
+    :}
     ;
 
-cierre_mientras ::= 
-    FINMIENTRAS 
-    | FIN MIENTRAS
-    ;
-
-condicional ::= 
-    SI PAR_IZQ condicion PAR_DER ENTONCES bloque_simple cierre_si
-    ;
-
-ciclo ::= 
-    MIENTRAS PAR_IZQ condicion PAR_DER HACER bloque_simple cierre_mientras
+ciclo ::=
+    MIENTRAS PAR_IZQ condicion:cond PAR_DER HACER bloque_simple:bloque cierre_mientras
+    {:
+        FiguraDiagrama nodoMientras = new FiguraDiagrama("CONDICION", "MIENTRAS " + cond);
+        nodoMientras.bloqueInterno = bloque;
+        RESULT = nodoMientras;
+    :}
     ;
 
 /**** EXPRESIONES ARITMÉTICAS ****/
 
 expr_aritmetica ::= 
-    expr_aritmetica MAS expr_aritmetica
-    | expr_aritmetica MENOS expr_aritmetica
-    | expr_aritmetica POR expr_aritmetica
-    | expr_aritmetica DIV expr_aritmetica
-    | PAR_IZQ expr_aritmetica PAR_DER
-    | ENTERO
-    | DECIMAL
-    | ID
+    expr_aritmetica:e1 MAS expr_aritmetica:e2 {: RESULT = e1 + " + " + e2; :}
+    | expr_aritmetica:e1 MENOS expr_aritmetica:e2 {: RESULT = e1 + " - " + e2; :}
+    | expr_aritmetica:e1 POR expr_aritmetica:e2 {: RESULT = e1 + " * " + e2; :}
+    | expr_aritmetica:e1 DIV expr_aritmetica:e2 {: RESULT = e1 + " / " + e2; :}
+    | PAR_IZQ expr_aritmetica:e PAR_DER {: RESULT = "(" + e + ")"; :}
+    | ENTERO:e {: RESULT = e; :}
+    | DECIMAL:d {: RESULT = d; :}
+    | ID:id {: RESULT = id; :}
     ;
 
 /***** CONDICIONES *****/
 
 condicion ::= 
-    expr_aritmetica IGUALDAD expr_aritmetica
-    | expr_aritmetica DIFERENTE expr_aritmetica
-    | expr_aritmetica MAYOR expr_aritmetica
-    | expr_aritmetica MENOR expr_aritmetica
-    | expr_aritmetica MAYOR_IGUAL expr_aritmetica
-    | expr_aritmetica MENOR_IGUAL expr_aritmetica
-    | condicion AND condicion
-    | condicion OR condicion
-    | NOT condicion
-    | PAR_IZQ condicion PAR_DER
+    expr_aritmetica:e1 IGUALDAD expr_aritmetica:e2 {: RESULT = e1 + " == " + e2; :}
+    | expr_aritmetica:e1 DIFERENTE expr_aritmetica:e2 {: RESULT = e1 + " != " + e2; :}
+    | expr_aritmetica:e1 MAYOR expr_aritmetica:e2 {: RESULT = e1 + " > " + e2; :}
+    | expr_aritmetica:e1 MENOR expr_aritmetica:e2 {: RESULT = e1 + " < " + e2; :}
+    | expr_aritmetica:e1 MAYOR_IGUAL expr_aritmetica:e2 {: RESULT = e1 + " >= " + e2; :}
+    | expr_aritmetica:e1 MENOR_IGUAL expr_aritmetica:e2 {: RESULT = e1 + " <= " + e2; :}
+    | condicion:c1 AND condicion:c2 {: RESULT = c1 + " && " + c2; :}
+    | condicion:c1 OR condicion:c2 {: RESULT = c1 + " || " + c2; :}
+    | NOT condicion:c {: RESULT = "!" + c; :}
+    | PAR_IZQ condicion:c PAR_DER {: RESULT = "(" + c + ")"; :}
     ;
 
 /***** SECCIÓN DE CONFIGURACIÓN *****/
 
-seccion_configuracion ::= 
-    configuraciones
-    ;
+seccion_configuracion ::= configuraciones ;
+configuraciones ::= configuraciones configuracion | configuracion ;
+indice_opt ::= PIPE expr_aritmetica | expr_aritmetica | ;
+expr_color ::= expr_aritmetica COMA expr_aritmetica COMA expr_aritmetica | COLOR_HEX ;
+figura ::= FIG_ELIPSE | FIG_CIRCULO | FIG_PARALELOGRAMO | FIG_RECTANGULO | FIG_ROMBO | FIG_REC_REDONDEADO ;
+fuente ::= FONT_ARIAL | FONT_TIMES | FONT_COMIC | FONT_VERDANA ;
 
-configuraciones ::= 
-    configuraciones configuracion
-    | configuracion
-    ;
-
-/* El índice en las configuraciones puede llevar barra vertical | o solo un espacio */
-indice_opt ::= 
-    PIPE expr_aritmetica
-    | expr_aritmetica
-    | /* vacío */
-    ;
-
-/* Colores en formato RGB separado por comas o hexa */
-expr_color ::= 
-    expr_aritmetica COMA expr_aritmetica COMA expr_aritmetica
-    | COLOR_HEX
-    ;
-
-figura ::= 
-    FIG_ELIPSE 
-    | FIG_CIRCULO 
-    | FIG_PARALELOGRAMO 
-    | FIG_RECTANGULO 
-    | FIG_ROMBO 
-    | FIG_REC_REDONDEADO
-    ;
-
-fuente ::= 
-    FONT_ARIAL 
-    | FONT_TIMES 
-    | FONT_COMIC 
-    | FONT_VERDANA
-    ;
-
-/***** REGLAS DE CONFIGURACIÓN *****/
-
-configuracion ::= 
-    /* Configuración Default */
-    CONF_DEFAULT IGUAL_ASIG expr_aritmetica
-    | CONF_DEFAULT expr_aritmetica
-
-    /* Configuraciones de SI */
+configuracion ::=
+    CONF_DEFAULT IGUAL_ASIG expr_aritmetica | CONF_DEFAULT expr_aritmetica
     | CONF_COLOR_TEXT_SI IGUAL_ASIG expr_color indice_opt
     | CONF_COLOR_SI IGUAL_ASIG expr_color indice_opt
     | CONF_FIGURA_SI IGUAL_ASIG figura indice_opt
     | CONF_FIGURA_SI figura indice_opt
     | CONF_LETRA_SI IGUAL_ASIG fuente indice_opt
     | CONF_LETRA_SIZE_SI IGUAL_ASIG expr_aritmetica indice_opt
-
-    /* Configuraciones de MIENTRAS */
     | CONF_COLOR_TEXT_MIENTRAS IGUAL_ASIG expr_color indice_opt
     | CONF_COLOR_MIENTRAS IGUAL_ASIG expr_color indice_opt
     | CONF_FIGURA_MIENTRAS IGUAL_ASIG figura indice_opt
     | CONF_FIGURA_MIENTRAS figura indice_opt
     | CONF_LETRA_MIENTRAS IGUAL_ASIG fuente indice_opt
     | CONF_LETRA_SIZE_MIENTRAS IGUAL_ASIG expr_aritmetica indice_opt
-
-    /* Configuraciones de BLOQUE */
     | CONF_COLOR_TEXT_BLOQUE IGUAL_ASIG expr_color indice_opt
     | CONF_COLOR_BLOQUE IGUAL_ASIG expr_color indice_opt
     | CONF_FIGURA_BLOQUE IGUAL_ASIG figura indice_opt
     | CONF_FIGURA_BLOQUE figura indice_opt
     | CONF_LETRA_BLOQUE IGUAL_ASIG fuente indice_opt
     | CONF_LETRA_SIZE_BLOQUE IGUAL_ASIG expr_aritmetica indice_opt
-
-    /* Recuperacion de errores: Si algo está mal se ignora y sigue leyendo las demas sin crashear el programa */
-    | error
-    ;
+    | error ;

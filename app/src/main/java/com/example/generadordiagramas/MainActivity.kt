@@ -7,16 +7,17 @@ import android.widget.EditText
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import com.example.generadordiagramas.analizador.FiguraDiagrama
 import java.io.StringReader
-
 import com.example.generadordiagramas.analizador.Lexer
 import com.example.generadordiagramas.analizador.Parser
 
-class MainActivity : AppCompatActivity() {
-
+class MainActivity : AppCompatActivity()
+{
     private lateinit var etCodigo: EditText
     private lateinit var btnCompilar: Button
     private lateinit var btnReportes: Button
+    private lateinit var lienzoDiagrama: VistaDiagrama
     private var listaLexicos = ArrayList<Lexer.ErrorLexico>()
     private var listaSintacticos = ArrayList<Any>()
 
@@ -27,6 +28,7 @@ class MainActivity : AppCompatActivity() {
         etCodigo = findViewById(R.id.etCodigo)
         btnCompilar = findViewById(R.id.btnCompilar)
         btnReportes = findViewById(R.id.btnReportes)
+        lienzoDiagrama = findViewById(R.id.lienzoDiagrama)
         btnCompilar.setOnClickListener()
         {
             val codigoTexto = etCodigo.text.toString()
@@ -49,7 +51,7 @@ class MainActivity : AppCompatActivity() {
         {
             val lexer = Lexer(StringReader(codigo))
             val parser = Parser(lexer)
-            parser.parse()
+            val resultadoParser = parser.parse()
             listaLexicos = lexer.listaErrores ?: ArrayList()
             listaSintacticos = parser.listaErrores as? ArrayList<Any> ?: ArrayList()
             val totalErrores = listaLexicos.size + listaSintacticos.size
@@ -57,10 +59,16 @@ class MainActivity : AppCompatActivity() {
             {
                 btnReportes.visibility = View.GONE
                 Toast.makeText(this, "¡Compilación Exitosa!", Toast.LENGTH_SHORT).show()
+                val listaDibujo = resultadoParser.value as? ArrayList<FiguraDiagrama>
+                if (listaDibujo != null)
+                {
+                    lienzoDiagrama.establecerDiagrama(listaDibujo)
+                }
             }
             else
             {
                 btnReportes.visibility = View.VISIBLE
+                lienzoDiagrama.establecerDiagrama(ArrayList())
                 Toast.makeText(this, "Se encontraron $totalErrores errores", Toast.LENGTH_LONG).show()
             }
         }
