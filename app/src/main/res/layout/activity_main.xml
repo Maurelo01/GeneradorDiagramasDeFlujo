@@ -1,67 +1,120 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:fitsSystemWindows="true"
     android:orientation="vertical"
-    tools:context=".MainActivity">
+    android:padding="16dp">
 
     <TextView
-        android:id="@+id/textView"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Ingresa tu Pseudocódigo:"
-        android:textSize="18sp"
-        android:textStyle="bold" />
+        android:text="Generador de Diagramas de Flujo"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        android:gravity="center"
+        android:paddingBottom="16dp"/>
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Ingrese el código:"
+        android:textSize="14sp"
+        android:paddingBottom="8dp"/>
 
     <EditText
-        android:id="@+id/etCodigo"
+        android:id="@+id/editTextoEntrada"
         android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="0.5"
-        android:ems="10"
-        android:gravity="start|top"
-        android:hint="Aqui va tu pseudocódigo..."
-        android:inputType="textMultiLine" />
+        android:layout_height="200dp"
+        android:gravity="top|start"
+        android:hint="INICIO\nVAR a = 10\nFIN\n%%%%\n%DEFAULT=1"
+        android:inputType="textMultiLine"
+        android:textSize="12sp"
+        android:fontFamily="monospace"
+        android:background="@android:drawable/edit_text"
+        android:padding="8dp"/>
 
-    <Button
-        android:id="@+id/btnCompilar"
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:backgroundTint="#009688"
-        android:text="Compilar"
-        android:visibility="visible" />
+        android:orientation="horizontal"
+        android:paddingTop="16dp"
+        android:paddingBottom="16dp">
 
-    <Button
-        android:id="@+id/btnReportes"
+        <Button
+            android:id="@+id/btnAnalizar"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Analizar"
+            android:backgroundTint="#4CAF50"/>
+
+    </LinearLayout>
+
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:backgroundTint="#E91E63"
-        android:text="Ver Reportes de Errores"
-        android:visibility="gone" />
+        android:orientation="horizontal"
+        android:paddingBottom="16dp">
+
+        <Button
+            android:id="@+id/btnReporteErrores"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Errores"
+            android:layout_marginEnd="4dp"
+            android:textSize="12sp"
+            android:backgroundTint="#F44336"/>
+
+        <Button
+            android:id="@+id/btnReporteOperadores"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Operadores"
+            android:layout_marginEnd="4dp"
+            android:textSize="12sp"
+            android:backgroundTint="#2196F3"/>
+
+        <Button
+            android:id="@+id/btnReporteControl"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Control"
+            android:textSize="12sp"
+            android:backgroundTint="#FF9800"/>
+
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/txtMensaje"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Ingrese código y presione Analizar"
+        android:textSize="14sp"
+        android:textColor="#666666"
+        android:gravity="center"
+        android:padding="16dp"
+        android:visibility="visible"/>
 
     <ScrollView
+        android:id="@+id/scrollDiagrama"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
-        android:layout_marginTop="16dp">
+        android:visibility="gone"
+        android:background="#F5F5F5">
 
         <HorizontalScrollView
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content">
 
-            <FrameLayout
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content">
+            <com.example.generadordiagramas.VistaDiagrama
+                android:id="@+id/vistaDiagrama"
+                android:layout_width="2000dp"
+                android:layout_height="2000dp"/>
 
-                <com.example.generadordiagramas.VistaDiagrama
-                    android:id="@+id/lienzoDiagrama"
-                    android:layout_width="1200dp"
-                    android:layout_height="1500dp"
-                    android:background="#E0E0E0" />
-            </FrameLayout>
         </HorizontalScrollView>
     </ScrollView>
 

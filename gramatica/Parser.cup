@@ -3,6 +3,7 @@ import java.util.ArrayList;
 
 /***** CÓDIGO DE USUARIO *****/
 parser code {:
+    // Clase para errores sintácticos
     public static class ErrorSintactico
     {
         public String lexema;
@@ -18,7 +19,256 @@ parser code {:
             this.descripcion = descripcion;
         }
     }
+
+    // Clase para reportes de operadores matemáticos
+    public static class ReporteOperador
+    {
+        public String operador;
+        public int linea;
+        public int columna;
+        public String ocurrencia;
+
+        public ReporteOperador(String o, int l, int c, String oc)
+        {
+            operador = o;
+            linea = l;
+            columna = c;
+            ocurrencia = oc;
+        }
+    }
+
+    // Clase para reportes de estructuras de control
+    public static class ReporteControl
+    {
+        public String objeto;
+        public int linea;
+        public String condicion;
+
+        public ReporteControl(String obj, int l, String c)
+        {
+            objeto = obj;
+            linea = l;
+            condicion = c;
+        }
+    }
+
+    // Clase para configuración visual
+    public static class ConfiguracionVisual
+    {
+        public java.util.HashMap<Integer, String> coloresTextoSi = new java.util.HashMap<>();
+        public java.util.HashMap<Integer, String> coloresSi = new java.util.HashMap<>();
+        public java.util.HashMap<Integer, String> figurasSi = new java.util.HashMap<>();
+
+        public java.util.HashMap<Integer, String> coloresTextoMientras = new java.util.HashMap<>();
+        public java.util.HashMap<Integer, String> coloresMientras = new java.util.HashMap<>();
+        public java.util.HashMap<Integer, String> figurasMientras = new java.util.HashMap<>();
+
+        public java.util.HashMap<Integer, String> coloresTextoBloque = new java.util.HashMap<>();
+        public java.util.HashMap<Integer, String> coloresBloques = new java.util.HashMap<>();
+        public java.util.HashMap<Integer, String> figurasBloque = new java.util.HashMap<>();
+
+        public String colorTextoSi = "#000000";
+        public String colorSi = "#CE93D8";
+        public String figuraSi = "ROMBO";
+
+        public String colorTextoMientras = "#000000";
+        public String colorMientras = "#CE93D8";
+        public String figuraMientras = "ROMBO";
+
+        public String colorTextoBloque = "#000000";
+        public String colorBloque = "#90CAF9";
+        public String figuraBloque = "RECTANGULO";
+
+        public void aplicarDefault(int indice)
+        {
+            coloresTextoSi.remove(indice);
+            coloresSi.remove(indice);
+            figurasSi.remove(indice);
+            coloresTextoMientras.remove(indice);
+            coloresMientras.remove(indice);
+            figurasMientras.remove(indice);
+            coloresTextoBloque.remove(indice);
+            coloresBloques.remove(indice);
+            figurasBloque.remove(indice);
+        }
+    }
+
+    // Listas globales
     public ArrayList<ErrorSintactico> listaErrores = new ArrayList<>();
+    public ArrayList<ReporteOperador> listaOperadores = new ArrayList<>();
+    public ArrayList<ReporteControl> listaControl = new ArrayList<>();
+    public ConfiguracionVisual config = new ConfiguracionVisual();
+
+    // Contadores para índices de elementos
+    public int contadorSi = 0;
+    public int contadorMientras = 0;
+    public int contadorBloque = 0;
+
+    // Métodos helper
+    public void agregarOperador(String op, int l, int c, String oc)
+    {
+        listaOperadores.add(new ReporteOperador(op, l, c, oc));
+    }
+
+    public void agregarControl(String obj, int l, String c)
+    {
+        listaControl.add(new ReporteControl(obj, l, c));
+    }
+
+    // Método para evaluar expresiones aritméticas
+    public double evaluarExpresion(String expr)
+    {
+        try
+        {
+            // Eliminar espacios y paréntesis externos
+            expr = expr.replaceAll("\\s+", "").replaceAll("[()]", "");
+
+            // Si es solo un número, retornarlo directamente
+            try
+            {
+                return Double.parseDouble(expr);
+            }
+            catch (NumberFormatException e)
+            {
+                // Es una expresión, continuar evaluando
+            }
+
+            // Evaluar multiplicación y división primero
+            expr = evaluarMultDiv(expr);
+
+            // Evaluar suma y resta
+            return evaluarSumaResta(expr);
+        }
+        catch (Exception e)
+        {
+            System.err.println("Error evaluando expresión: " + expr + " - " + e.getMessage());
+            return 0.0;
+        }
+    }
+
+    private String evaluarMultDiv(String expr)
+    {
+        while (expr.contains("*") || expr.contains("/"))
+        {
+            // Buscar primer operador de multiplicación o división
+            int idxMul = expr.indexOf("*");
+            int idxDiv = expr.indexOf("/");
+
+            int idx;
+            char op;
+
+            if (idxMul >= 0 && (idxDiv < 0 || idxMul < idxDiv))
+            {
+                idx = idxMul;
+                op = '*';
+            }
+            else if (idxDiv >= 0)
+            {
+                idx = idxDiv;
+                op = '/';
+            }
+            else
+            {
+                break;
+            }
+
+            // Extraer operandos
+            double izq = extraerNumeroIzquierda(expr, idx);
+            double der = extraerNumeroDerecha(expr, idx);
+
+            // Calcular resultado
+            double resultado = (op == '*') ? izq * der : izq / der;
+
+            // Encontrar posiciones para reemplazar
+            int posIzq = encontrarInicioNumero(expr, idx);
+            int posDer = encontrarFinNumero(expr, idx + 1);
+
+            // Reemplazar en la expresión
+            expr = expr.substring(0, posIzq) + resultado + expr.substring(posDer);
+        }
+        return expr;
+    }
+
+    private double evaluarSumaResta(String expr)
+    {
+        double resultado = 0.0;
+        StringBuilder numero = new StringBuilder();
+        char operacion = '+';
+
+        for (int i = 0; i < expr.length(); i++)
+        {
+            char c = expr.charAt(i);
+
+            if (Character.isDigit(c) || c == '.')
+            {
+                numero.append(c);
+            }
+            else if ((c == '+' || c == '-') && numero.length() > 0)
+            {
+                double val = Double.parseDouble(numero.toString());
+                resultado = (operacion == '+') ? resultado + val : resultado - val;
+                numero = new StringBuilder();
+                operacion = c;
+            }
+            else if (c == '-' && numero.length() == 0 && i == 0)
+            {
+                // Número negativo al inicio
+                numero.append(c);
+            }
+        }
+
+        // Procesar último número
+        if (numero.length() > 0)
+        {
+            double val = Double.parseDouble(numero.toString());
+            resultado = (operacion == '+') ? resultado + val : resultado - val;
+        }
+
+        return resultado;
+    }
+
+    private double extraerNumeroIzquierda(String expr, int pos)
+    {
+        int inicio = pos - 1;
+        while (inicio >= 0 && (Character.isDigit(expr.charAt(inicio)) || expr.charAt(inicio) == '.'))
+        {
+            inicio--;
+        }
+        String num = expr.substring(inicio + 1, pos);
+        return Double.parseDouble(num);
+    }
+
+    private double extraerNumeroDerecha(String expr, int pos)
+    {
+        int fin = pos + 1;
+        while (fin < expr.length() && (Character.isDigit(expr.charAt(fin)) || expr.charAt(fin) == '.'))
+        {
+            fin++;
+        }
+        String num = expr.substring(pos + 1, fin);
+        return Double.parseDouble(num);
+    }
+
+    private int encontrarInicioNumero(String expr, int pos)
+    {
+        int inicio = pos - 1;
+        while (inicio >= 0 && (Character.isDigit(expr.charAt(inicio)) || expr.charAt(inicio) == '.'))
+        {
+            inicio--;
+        }
+        return inicio + 1;
+    }
+
+    private int encontrarFinNumero(String expr, int pos)
+    {
+        int fin = pos;
+        while (fin < expr.length() && (Character.isDigit(expr.charAt(fin)) || expr.charAt(fin) == '.'))
+        {
+            fin++;
+        }
+        return fin;
+    }
+
     @Override
     public void syntax_error(Symbol s)
     {
@@ -26,6 +276,7 @@ parser code {:
         listaErrores.add(new ErrorSintactico(lexema, s.left, s.right, "Se esperaba otro token"));
         System.err.println("Error Sintáctico: " + lexema + " en línea " + s.left + " columna " + s.right);
     }
+
     @Override
     public void unrecovered_syntax_error(Symbol s) throws java.lang.Exception
     {
@@ -79,11 +330,11 @@ non terminal ArrayList<FiguraDiagrama> programa, seccion_algoritmo, instruccione
 non terminal FiguraDiagrama instruccion, instruccion_simple, declaracion, asignacion, mostrar, leer, condicional, ciclo;
 non terminal String expr_aritmetica, condicion;
 non terminal seccion_configuracion, configuraciones, configuracion;
-non terminal String expr_color, figura, fuente, indice_opt;
+non terminal String expr_color, figura, fuente;
+non terminal Integer indice_opt;
 non terminal cierre_si, cierre_mientras;
 
 /***** PRECEDENCIA DE OPERADORES *****/
-// De menor a mayor precedencia
 precedence left OR;
 precedence left AND;
 precedence right NOT;
@@ -95,16 +346,12 @@ precedence left POR, DIV;
 
 start with programa;
 
-/***** PRINCIPAL ****/
-
-programa ::= 
+programa ::=
     seccion_algoritmo:lista SEPARADOR seccion_configuracion
     {: RESULT = lista; :}
     ;
 
-/***** SECCION DE ALGORITMO *****/
-
-seccion_algoritmo ::= 
+seccion_algoritmo ::=
     INICIO instrucciones:lista FIN
     {:
         ArrayList<FiguraDiagrama> diagrama = new ArrayList<>();
@@ -115,7 +362,7 @@ seccion_algoritmo ::=
     :}
     ;
 
-instrucciones ::= 
+instrucciones ::=
     instrucciones:lista instruccion:inst
     {:
         lista.add(inst);
@@ -129,13 +376,13 @@ instrucciones ::=
     :}
     ;
 
-/* Instrucción de primer nivel (puede ser ciclo o condicional) */
-instruccion ::= 
-    instruccion_simple:i {: RESULT = i; :} | condicional:c {: RESULT = c; :} | ciclo:c {: RESULT = c; :}
+instruccion ::=
+    instruccion_simple:i {: RESULT = i; :}
+    | condicional:c {: RESULT = c; :}
+    | ciclo:c {: RESULT = c; :}
     ;
 
-/* Bloque interno para evitar anidamientos. Solo acepta instrucciones simples */
-bloque_simple ::= 
+bloque_simple ::=
     bloque_simple:lista instruccion_simple:inst
     {:
         lista.add(inst);
@@ -148,108 +395,334 @@ bloque_simple ::=
         RESULT = lista;
     :}
     ;
-    instruccion_simple ::=
-        declaracion:d {: RESULT = d; :} | asignacion:a {: RESULT = a; :} | mostrar:m {: RESULT = m; :} | leer:l {: RESULT = l; :}
-        ;
 
-/***** INSTRUCCIONES SIMPLES *****/
+instruccion_simple ::=
+    declaracion:d {: RESULT = d; :}
+    | asignacion:a {: RESULT = a; :}
+    | mostrar:m {: RESULT = m; :}
+    | leer:l {: RESULT = l; :}
+    ;
 
-declaracion ::= 
-    VAR ID:id IGUAL_ASIG expr_aritmetica:e {: RESULT = new FiguraDiagrama("PROCESO", "VAR " + id + " = " + e); :}
-    | VAR ID:id {: RESULT = new FiguraDiagrama("PROCESO", "VAR " + id); :}
+declaracion ::=
+    VAR ID:id IGUAL_ASIG expr_aritmetica:e
+    {:
+        parser.contadorBloque++;
+        FiguraDiagrama nodo = new FiguraDiagrama("PROCESO", "VAR " + id + " = " + e);
+        nodo.indiceElemento = parser.contadorBloque;
+        RESULT = nodo;
+    :}
+    | VAR ID:id
+    {:
+        parser.contadorBloque++;
+        FiguraDiagrama nodo = new FiguraDiagrama("PROCESO", "VAR " + id);
+        nodo.indiceElemento = parser.contadorBloque;
+        RESULT = nodo;
+    :}
     ;
 
 asignacion ::=
-    ID:id IGUAL_ASIG expr_aritmetica:e {: RESULT = new FiguraDiagrama("PROCESO", id + " = " + e); :}
+    ID:id IGUAL_ASIG expr_aritmetica:e
+    {:
+        parser.contadorBloque++;
+        FiguraDiagrama nodo = new FiguraDiagrama("PROCESO", id + " = " + e);
+        nodo.indiceElemento = parser.contadorBloque;
+        RESULT = nodo;
+    :}
     ;
 
 mostrar ::=
-    MOSTRAR CADENA:c {: RESULT = new FiguraDiagrama("IO", "MOSTRAR " + c); :}
-    | MOSTRAR expr_aritmetica:e {: RESULT = new FiguraDiagrama("IO", "MOSTRAR " + e); :}
+    MOSTRAR CADENA:c
+    {: RESULT = new FiguraDiagrama("IO", "MOSTRAR " + c); :}
+    | MOSTRAR expr_aritmetica:e
+    {: RESULT = new FiguraDiagrama("IO", "MOSTRAR " + e); :}
     ;
 
 leer ::=
-    LEER ID:id {: RESULT = new FiguraDiagrama("IO", "LEER " + id); :}
+    LEER ID:id
+    {: RESULT = new FiguraDiagrama("IO", "LEER " + id); :}
     ;
-
-/***** ESTRUCTURAS DE CONTROL *****/
 
 cierre_si ::= FINSI | FIN SI ;
 cierre_mientras ::= FINMIENTRAS | FIN MIENTRAS ;
 
 condicional ::=
-    SI PAR_IZQ condicion:cond PAR_DER ENTONCES bloque_simple:bloque cierre_si
+    SI:s PAR_IZQ condicion:cond PAR_DER ENTONCES bloque_simple:bloque cierre_si
     {:
+        parser.contadorSi++;
+        parser.agregarControl("SI", sleft, cond);
         FiguraDiagrama nodoSi = new FiguraDiagrama("CONDICION", cond);
         nodoSi.bloqueInterno = bloque;
+        nodoSi.indiceElemento = parser.contadorSi;
         RESULT = nodoSi;
     :}
     ;
 
 ciclo ::=
-    MIENTRAS PAR_IZQ condicion:cond PAR_DER HACER bloque_simple:bloque cierre_mientras
+    MIENTRAS:m PAR_IZQ condicion:cond PAR_DER HACER bloque_simple:bloque cierre_mientras
     {:
+        parser.contadorMientras++;
+        parser.agregarControl("MIENTRAS", mleft, cond);
         FiguraDiagrama nodoMientras = new FiguraDiagrama("CONDICION", "MIENTRAS " + cond);
         nodoMientras.bloqueInterno = bloque;
+        nodoMientras.indiceElemento = parser.contadorMientras;
         RESULT = nodoMientras;
     :}
     ;
 
-/**** EXPRESIONES ARITMÉTICAS ****/
-
-expr_aritmetica ::= 
-    expr_aritmetica:e1 MAS expr_aritmetica:e2 {: RESULT = e1 + " + " + e2; :}
-    | expr_aritmetica:e1 MENOS expr_aritmetica:e2 {: RESULT = e1 + " - " + e2; :}
-    | expr_aritmetica:e1 POR expr_aritmetica:e2 {: RESULT = e1 + " * " + e2; :}
-    | expr_aritmetica:e1 DIV expr_aritmetica:e2 {: RESULT = e1 + " / " + e2; :}
-    | PAR_IZQ expr_aritmetica:e PAR_DER {: RESULT = "(" + e + ")"; :}
-    | ENTERO:e {: RESULT = e; :}
-    | DECIMAL:d {: RESULT = d; :}
-    | ID:id {: RESULT = id; :}
+expr_aritmetica ::=
+    expr_aritmetica:e1 MAS:op expr_aritmetica:e2
+    {:
+        String oc = e1 + " + " + e2;
+        parser.agregarOperador("Suma", opleft, opright, oc);
+        RESULT = oc;
+    :}
+    | expr_aritmetica:e1 MENOS:op expr_aritmetica:e2
+    {:
+        String oc = e1 + " - " + e2;
+        parser.agregarOperador("Resta", opleft, opright, oc);
+        RESULT = oc;
+    :}
+    | expr_aritmetica:e1 POR:op expr_aritmetica:e2
+    {:
+        String oc = e1 + " * " + e2;
+        parser.agregarOperador("Multiplicación", opleft, opright, oc);
+        RESULT = oc;
+    :}
+    | expr_aritmetica:e1 DIV:op expr_aritmetica:e2
+    {:
+        String oc = e1 + " / " + e2;
+        parser.agregarOperador("División", opleft, opright, oc);
+        RESULT = oc;
+    :}
+    | PAR_IZQ expr_aritmetica:e PAR_DER
+    {: RESULT = "(" + e + ")"; :}
+    | ENTERO:e
+    {: RESULT = e; :}
+    | DECIMAL:d
+    {: RESULT = d; :}
+    | ID:id
+    {: RESULT = id; :}
     ;
 
-/***** CONDICIONES *****/
-
-condicion ::= 
-    expr_aritmetica:e1 IGUALDAD expr_aritmetica:e2 {: RESULT = e1 + " == " + e2; :}
-    | expr_aritmetica:e1 DIFERENTE expr_aritmetica:e2 {: RESULT = e1 + " != " + e2; :}
-    | expr_aritmetica:e1 MAYOR expr_aritmetica:e2 {: RESULT = e1 + " > " + e2; :}
-    | expr_aritmetica:e1 MENOR expr_aritmetica:e2 {: RESULT = e1 + " < " + e2; :}
-    | expr_aritmetica:e1 MAYOR_IGUAL expr_aritmetica:e2 {: RESULT = e1 + " >= " + e2; :}
-    | expr_aritmetica:e1 MENOR_IGUAL expr_aritmetica:e2 {: RESULT = e1 + " <= " + e2; :}
-    | condicion:c1 AND condicion:c2 {: RESULT = c1 + " && " + c2; :}
-    | condicion:c1 OR condicion:c2 {: RESULT = c1 + " || " + c2; :}
-    | NOT condicion:c {: RESULT = "!" + c; :}
-    | PAR_IZQ condicion:c PAR_DER {: RESULT = "(" + c + ")"; :}
+condicion ::=
+    expr_aritmetica:e1 IGUALDAD expr_aritmetica:e2
+    {: RESULT = e1 + " == " + e2; :}
+    | expr_aritmetica:e1 DIFERENTE expr_aritmetica:e2
+    {: RESULT = e1 + " != " + e2; :}
+    | expr_aritmetica:e1 MAYOR expr_aritmetica:e2
+    {: RESULT = e1 + " > " + e2; :}
+    | expr_aritmetica:e1 MENOR expr_aritmetica:e2
+    {: RESULT = e1 + " < " + e2; :}
+    | expr_aritmetica:e1 MAYOR_IGUAL expr_aritmetica:e2
+    {: RESULT = e1 + " >= " + e2; :}
+    | expr_aritmetica:e1 MENOR_IGUAL expr_aritmetica:e2
+    {: RESULT = e1 + " <= " + e2; :}
+    | condicion:c1 AND condicion:c2
+    {: RESULT = c1 + " && " + c2; :}
+    | condicion:c1 OR condicion:c2
+    {: RESULT = c1 + " || " + c2; :}
+    | NOT condicion:c
+    {: RESULT = "!" + c; :}
+    | PAR_IZQ condicion:c PAR_DER
+    {: RESULT = "(" + c + ")"; :}
     ;
-
-/***** SECCIÓN DE CONFIGURACIÓN *****/
 
 seccion_configuracion ::= configuraciones ;
+
 configuraciones ::= configuraciones configuracion | configuracion ;
-indice_opt ::= PIPE expr_aritmetica | expr_aritmetica | ;
-expr_color ::= expr_aritmetica COMA expr_aritmetica COMA expr_aritmetica | COLOR_HEX ;
-figura ::= FIG_ELIPSE | FIG_CIRCULO | FIG_PARALELOGRAMO | FIG_RECTANGULO | FIG_ROMBO | FIG_REC_REDONDEADO ;
+
+indice_opt ::=
+    PIPE expr_aritmetica:e
+    {: RESULT = (int)parser.evaluarExpresion(e); :}
+    | expr_aritmetica:e
+    {: RESULT = (int)parser.evaluarExpresion(e); :}
+    | /* vacío */
+    {: RESULT = -1; :}
+    ;
+
+expr_color ::=
+    expr_aritmetica:r COMA expr_aritmetica:g COMA expr_aritmetica:b
+    {:
+        int rVal = (int)parser.evaluarExpresion(r);
+        int gVal = (int)parser.evaluarExpresion(g);
+        int bVal = (int)parser.evaluarExpresion(b);
+        rVal = Math.max(0, Math.min(255, rVal));
+        gVal = Math.max(0, Math.min(255, gVal));
+        bVal = Math.max(0, Math.min(255, bVal));
+        RESULT = String.format("#%02X%02X%02X", rVal, gVal, bVal);
+    :}
+    | COLOR_HEX:c
+    {:
+        if (c.startsWith("H"))
+        {
+            RESULT = "#" + c.substring(1);
+        }
+        else
+        {
+            RESULT = c;
+        }
+    :}
+    ;
+
+figura ::=
+    FIG_ELIPSE:f {: RESULT = "ELIPSE"; :}
+    | FIG_CIRCULO:f {: RESULT = "CIRCULO"; :}
+    | FIG_PARALELOGRAMO:f {: RESULT = "PARALELOGRAMO"; :}
+    | FIG_RECTANGULO:f {: RESULT = "RECTANGULO"; :}
+    | FIG_ROMBO:f {: RESULT = "ROMBO"; :}
+    | FIG_REC_REDONDEADO:f {: RESULT = "RECTANGULO_REDONDEADO"; :}
+    ;
+
 fuente ::= FONT_ARIAL | FONT_TIMES | FONT_COMIC | FONT_VERDANA ;
 
 configuracion ::=
-    CONF_DEFAULT IGUAL_ASIG expr_aritmetica | CONF_DEFAULT expr_aritmetica
-    | CONF_COLOR_TEXT_SI IGUAL_ASIG expr_color indice_opt
-    | CONF_COLOR_SI IGUAL_ASIG expr_color indice_opt
-    | CONF_FIGURA_SI IGUAL_ASIG figura indice_opt
-    | CONF_FIGURA_SI figura indice_opt
+    CONF_DEFAULT IGUAL_ASIG expr_aritmetica:e
+    {:
+        int idx = (int)parser.evaluarExpresion(e);
+        parser.config.aplicarDefault(idx);
+    :}
+    | CONF_DEFAULT expr_aritmetica:e
+    {:
+        int idx = (int)parser.evaluarExpresion(e);
+        parser.config.aplicarDefault(idx);
+    :}
+    | CONF_COLOR_TEXT_SI IGUAL_ASIG expr_color:c indice_opt:idx
+    {:
+        if (idx != null && idx > 0)
+        {
+            parser.config.coloresTextoSi.put(idx, c);
+        }
+        else
+        {
+            parser.config.colorTextoSi = c;
+        }
+    :}
+    | CONF_COLOR_SI IGUAL_ASIG expr_color:c indice_opt:idx
+    {:
+        if (idx != null && idx > 0)
+        {
+            parser.config.coloresSi.put(idx, c);
+        }
+        else
+        {
+            parser.config.colorSi = c;
+        }
+    :}
+    | CONF_FIGURA_SI IGUAL_ASIG figura:f indice_opt:idx
+    {:
+        if (idx != null && idx > 0)
+        {
+            parser.config.figurasSi.put(idx, f);
+        }
+        else
+        {
+            parser.config.figuraSi = f;
+        }
+    :}
+    | CONF_FIGURA_SI figura:f indice_opt:idx
+    {:
+        if (idx != null && idx > 0)
+        {
+            parser.config.figurasSi.put(idx, f);
+        }
+        else
+        {
+            parser.config.figuraSi = f;
+        }
+    :}
     | CONF_LETRA_SI IGUAL_ASIG fuente indice_opt
     | CONF_LETRA_SIZE_SI IGUAL_ASIG expr_aritmetica indice_opt
-    | CONF_COLOR_TEXT_MIENTRAS IGUAL_ASIG expr_color indice_opt
-    | CONF_COLOR_MIENTRAS IGUAL_ASIG expr_color indice_opt
-    | CONF_FIGURA_MIENTRAS IGUAL_ASIG figura indice_opt
-    | CONF_FIGURA_MIENTRAS figura indice_opt
+    | CONF_COLOR_TEXT_MIENTRAS IGUAL_ASIG expr_color:c indice_opt:idx
+    {:
+        if (idx != null && idx > 0)
+        {
+            parser.config.coloresTextoMientras.put(idx, c);
+        }
+        else
+        {
+            parser.config.colorTextoMientras = c;
+        }
+    :}
+    | CONF_COLOR_MIENTRAS IGUAL_ASIG expr_color:c indice_opt:idx
+    {:
+        if (idx != null && idx > 0)
+        {
+            parser.config.coloresMientras.put(idx, c);
+        }
+        else
+        {
+            parser.config.colorMientras = c;
+        }
+    :}
+    | CONF_FIGURA_MIENTRAS IGUAL_ASIG figura:f indice_opt:idx
+    {:
+        if (idx != null && idx > 0)
+        {
+            parser.config.figurasMientras.put(idx, f);
+        }
+        else
+        {
+            parser.config.figuraMientras = f;
+        }
+    :}
+    | CONF_FIGURA_MIENTRAS figura:f indice_opt:idx
+    {:
+        if (idx != null && idx > 0)
+        {
+            parser.config.figurasMientras.put(idx, f);
+        }
+        else
+        {
+            parser.config.figuraMientras = f;
+        }
+    :}
     | CONF_LETRA_MIENTRAS IGUAL_ASIG fuente indice_opt
     | CONF_LETRA_SIZE_MIENTRAS IGUAL_ASIG expr_aritmetica indice_opt
-    | CONF_COLOR_TEXT_BLOQUE IGUAL_ASIG expr_color indice_opt
-    | CONF_COLOR_BLOQUE IGUAL_ASIG expr_color indice_opt
-    | CONF_FIGURA_BLOQUE IGUAL_ASIG figura indice_opt
-    | CONF_FIGURA_BLOQUE figura indice_opt
+    | CONF_COLOR_TEXT_BLOQUE IGUAL_ASIG expr_color:c indice_opt:idx
+    {:
+        if (idx != null && idx > 0)
+        {
+            parser.config.coloresTextoBloque.put(idx, c);
+        }
+        else
+        {
+            parser.config.colorTextoBloque = c;
+        }
+    :}
+    | CONF_COLOR_BLOQUE IGUAL_ASIG expr_color:c indice_opt:idx
+    {:
+        if (idx != null && idx > 0)
+        {
+            parser.config.coloresBloques.put(idx, c);
+        }
+        else
+        {
+            parser.config.colorBloque = c;
+        }
+    :}
+    | CONF_FIGURA_BLOQUE IGUAL_ASIG figura:f indice_opt:idx
+    {:
+        if (idx != null && idx > 0)
+        {
+            parser.config.figurasBloque.put(idx, f);
+        }
+        else
+        {
+            parser.config.figuraBloque = f;
+        }
+    :}
+    | CONF_FIGURA_BLOQUE figura:f indice_opt:idx
+    {:
+        if (idx != null && idx > 0)
+        {
+            parser.config.figurasBloque.put(idx, f);
+        }
+        else
+        {
+            parser.config.figuraBloque = f;
+        }
+    :}
     | CONF_LETRA_BLOQUE IGUAL_ASIG fuente indice_opt
     | CONF_LETRA_SIZE_BLOQUE IGUAL_ASIG expr_aritmetica indice_opt
-    | error ;
+    | error
+    ;
