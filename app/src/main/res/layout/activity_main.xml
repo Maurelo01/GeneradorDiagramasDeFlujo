@@ -20,7 +20,7 @@
         android:id="@+id/etCodigo"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_weight="1"
+        android:layout_weight="0.5"
         android:ems="10"
         android:gravity="start|top"
         android:hint="Aqui va tu pseudocódigo..."
@@ -41,5 +41,11 @@
         android:backgroundTint="#E91E63"
         android:text="Ver Reportes de Errores"
         android:visibility="gone" />
+
+    <com.example.generadordiagramas.VistaDiagrama
+        android:id="@+id/lienzoDiagrama"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_weight="1" />
 
 </LinearLayout>
