@@ -52,12 +52,12 @@
         android:paddingBottom="16dp">
 
         <Button
-            android:id="@+id/btnAnalizar"
+            android:id="@+id/btnCompilar"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:backgroundTint="#8BC34A"
-            android:text="Analizar" />
+            android:text="Compilar" />
 
     </LinearLayout>
 
